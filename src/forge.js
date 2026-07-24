@@ -163,28 +163,150 @@ function card(p,finish,px,uid){
   s+=logoH(hn,120,333,labelCol);
   s+=`</svg>`;return{svg:s,c:c};
 }
-let state={house:'All',finish:'sigil',mode:'single',seed:Math.floor(Math.random()*1e7)};
+// ------------------------------------------------------------------
+// FIREBASE (optional) — the Patron Registry. Configured via
+// firebase-config.js. When absent, minted Patrons live in this
+// browser's localStorage instead of the shared Registry.
+// ------------------------------------------------------------------
+const fb={enabled:false,db:null};
+function initFirebase(){
+  try{
+    if(window.BLEXX_FIREBASE_CONFIG&&window.firebase){
+      firebase.initializeApp(window.BLEXX_FIREBASE_CONFIG);
+      fb.db=firebase.firestore();fb.enabled=true;
+      console.info('[BLEXX] Registry enabled:',window.BLEXX_FIREBASE_CONFIG.projectId);
+    }else{
+      console.info('[BLEXX] Firebase not configured — Registry running in local-only mode.');
+    }
+  }catch(err){
+    console.error('[BLEXX] Firebase init failed — falling back to local mode.',err);
+    fb.enabled=false;
+  }
+}
+initFirebase();
+const LOCAL_KEY='blexx_patrons_local';
+function localFeedRead(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]');}catch(e){return[];}}
+function localFeedWrite(list){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(list.slice(0,12)));}catch(e){}}
+
+let state={house:'All',finish:'sigil',mode:'single',seed:Math.floor(Math.random()*1e7),minted:false};
 const stage=document.getElementById('stage'),meta=document.getElementById('meta');
 const seedfield=document.getElementById('seedfield'),goBtn=document.getElementById('go'),seedhint=document.getElementById('seedhint');
-function render(){
+const stageWrap=document.getElementById('stageWrap'),stageFlash=document.getElementById('stageFlash');
+const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
+const mintBtn=document.getElementById('mintBtn'),mintHint=document.getElementById('mintHint');
+const feedEl=document.getElementById('feed'),registryCount=document.getElementById('registryCount');
+
+function flashStage(kind){
+  stageFlash.classList.remove('roll','seal');void stageFlash.offsetWidth;
+  stageFlash.classList.add(kind);
+  if(kind==='seal'){stageWrap.classList.add('sealing');setTimeout(()=>stageWrap.classList.remove('sealing'),900);}
+  const target=stage.firstElementChild;
+  if(target){target.classList.remove('pop');void target.offsetWidth;target.classList.add('pop');}
+}
+function setStatus(minted){
+  state.minted=minted;
+  statusDot.classList.toggle('sealed',minted);
+  statusText.textContent=minted?'SEALED':'UNSEALED';
+  mintBtn.disabled=state.mode!=='single'||minted;
+}
+function syncPills(containerId,value){
+  document.querySelectorAll('#'+containerId+' button').forEach(b=>{
+    const on=b.dataset.v===value;
+    b.classList.toggle('active',on);b.setAttribute('aria-pressed',on);
+  });
+}
+
+function render(flash){
   seedfield.value=state.seed;
+  const tintHouse=state.house!=='All'?state.house:(state.mode==='single'?derive(state.seed,state.house).house:null);
+  document.body.className=tintHouse?('house-'+tintHouse.toLowerCase()):'house-all';
   if(state.mode==='single'){
     const p=derive(state.seed,state.house);const out=card(p,state.finish,300,'h'+state.seed);
     stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
     seedhint.textContent=`= ${p.code}`;
     meta.textContent=`${p.name} · ${p.rank} of ${p.house} · ${p.wingSize}/${p.wingTex} wings · ${out.c.rarity} · ${p.code}`;
+    mintBtn.style.display='';mintHint.style.display='';
   }else{
     let cells='';for(let i=0;i<9;i++){const p=derive(state.seed+i*1013,state.house);cells+=card(p,state.finish,'100%','s'+state.seed+'_'+i).svg;}
     stage.innerHTML=`<div id="sheet">${cells}</div>`;
     seedhint.textContent='base seed (9-up)';
     meta.textContent=`Press sheet · 9-up · base seed ${state.seed}`;
+    mintBtn.style.display='none';mintHint.style.display='none';
   }
+  setStatus(false);
+  mintHint.textContent='';
+  if(flash)flashStage('roll');
 }
-function applySeed(){let v=parseInt(seedfield.value,10);if(!isNaN(v)){state.seed=Math.max(0,v);render();}}
+
+function applySeed(){let v=parseInt(seedfield.value,10);if(!isNaN(v)){state.seed=Math.max(0,v);render(true);}}
 goBtn.onclick=applySeed;
 seedfield.addEventListener('keydown',e=>{if(e.key==='Enter')applySeed();});
-document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);render();};
-document.getElementById('house').onchange=e=>{state.house=e.target.value;render();};
-document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;document.querySelectorAll('#finish button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
-document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{state.mode=b.dataset.v;document.querySelectorAll('#mode button').forEach(x=>x.setAttribute('aria-pressed',x===b));render();});
-render();
+document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);render(true);};
+document.querySelectorAll('#house button').forEach(b=>b.onclick=()=>{state.house=b.dataset.v;syncPills('house',state.house);render(true);});
+document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;syncPills('finish',state.finish);render(true);});
+document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{state.mode=b.dataset.v;syncPills('mode',state.mode);render(false);});
+
+// ------------------------------------------------------------------
+// MINT — seal the currently displayed Patron into the Registry.
+// ------------------------------------------------------------------
+async function mintCurrent(){
+  if(state.mode!=='single'||state.minted)return;
+  const p=derive(state.seed,state.house);
+  mintBtn.disabled=true;mintHint.textContent='Sealing…';
+  const doc={seed:p.seed,forcedHouse:state.house,finish:state.finish,house:p.house,name:p.name,rank:p.rank,code:p.code};
+  try{
+    if(fb.enabled){
+      await fb.db.collection('patrons').add(Object.assign({},doc,{mintedAt:firebase.firestore.FieldValue.serverTimestamp()}));
+      await loadFeed();
+    }else{
+      const list=localFeedRead();list.unshift(Object.assign({},doc,{mintedAt:Date.now()}));localFeedWrite(list);renderFeed(list);
+    }
+    setStatus(true);flashStage('seal');
+    mintHint.textContent=`Sealed as ${p.code} — added to the Registry.`;
+  }catch(err){
+    console.error('[BLEXX] Mint failed, saving locally instead.',err);
+    const list=localFeedRead();list.unshift(Object.assign({},doc,{mintedAt:Date.now()}));localFeedWrite(list);renderFeed(list);
+    setStatus(true);flashStage('seal');
+    mintHint.textContent=`Sealed as ${p.code} (saved locally — Registry unreachable).`;
+  }
+}
+mintBtn.onclick=mintCurrent;
+
+// ------------------------------------------------------------------
+// THE PATRON REGISTRY — recent mints feed
+// ------------------------------------------------------------------
+function loadIntoStage(d){
+  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';state.mode='single';
+  syncPills('house',state.house);syncPills('finish',state.finish);syncPills('mode','single');
+  render(false);setStatus(true);
+}
+function feedCardHTML(d,id){
+  const p=derive(d.seed,d.forcedHouse);const out=card(p,d.finish,100,'f'+id);
+  const accent=HOUSES[d.house]?HOUSES[d.house].bg:'#948f87';
+  return `<div class="feed-card" style="--fc-accent:${accent};--fc-glow:${accent}66" data-seed="${d.seed}" data-house="${d.forcedHouse}" data-finish="${d.finish}">`
+    +`<div class="feed-thumb">${out.svg}</div>`
+    +`<div class="feed-name">${p.name}</div>`
+    +`<div class="feed-house">${p.house}</div>`
+    +`</div>`;
+}
+function renderFeed(docs){
+  if(!docs.length){feedEl.innerHTML='<div class="feed-placeholder">No Patrons minted yet — be the first.</div>';registryCount.textContent='';return;}
+  feedEl.innerHTML=docs.map((d,i)=>feedCardHTML(d,i)).join('');
+  registryCount.textContent=docs.length+' shown';
+  feedEl.querySelectorAll('.feed-card').forEach((el,i)=>{
+    el.onclick=()=>loadIntoStage(docs[i]);
+  });
+}
+async function loadFeed(){
+  if(!fb.enabled){renderFeed(localFeedRead());return;}
+  try{
+    const snap=await fb.db.collection('patrons').orderBy('mintedAt','desc').limit(12).get();
+    renderFeed(snap.docs.map(d=>d.data()));
+  }catch(err){
+    console.error('[BLEXX] Registry feed failed, falling back to local.',err);
+    renderFeed(localFeedRead());
+  }
+}
+loadFeed();
+
+render(false);

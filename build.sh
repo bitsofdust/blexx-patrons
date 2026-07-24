@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Assemble src/ into dist/index.html and syntax-check the JS.
+# Assemble src/ into index.html (repo root, for GitHub Pages) and
+# syntax-check the JS.
 set -euo pipefail
 cd "$(dirname "$0")"
-mkdir -p dist
 {
   cat src/head.html
   echo '<script>'
@@ -11,10 +11,10 @@ mkdir -p dist
   echo '</script>'
   echo '</body>'
   echo '</html>'
-} > dist/index.html
+} > index.html
 cat src/logo-data.js src/forge.js > /tmp/_blexx_check.js
 if command -v node >/dev/null 2>&1; then
-  node --check /tmp/_blexx_check.js && echo "OK  dist/index.html  ($(wc -c < dist/index.html) bytes)"
+  node --check /tmp/_blexx_check.js && echo "OK  index.html  ($(wc -c < index.html) bytes)"
 else
-  echo "built dist/index.html  ($(wc -c < dist/index.html) bytes)  [node not found: skipped JS check]"
+  echo "built index.html  ($(wc -c < index.html) bytes)  [node not found: skipped JS check]"
 fi

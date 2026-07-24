@@ -1,15 +1,27 @@
-# BLEXX Angel Forge — working notes for Claude Code
+# BLEXX Patrons — working notes for Claude Code
 
 Generative collectible-creature forge for the BLEXX world. A single standalone
-HTML app that mints winged "little beings," one per seed, across three Houses.
-Cute-occult collectible aesthetic. Intended for 2-color specialty print (letterpress
-/ spot color), with foil and NFC as chase/finish layers.
+HTML app that mints winged Patrons, one per seed, across three Houses, and seals
+them into a public Registry (Firestore). Cute-occult collectible aesthetic.
+Intended for 2-color specialty print (letterpress / spot color), with foil and
+NFC as chase/finish layers.
+
+Sibling BLEXX properties: `bitsofdust/blexx-gif` (entropy engine) and
+`bitsofdust/blexx-spellbinder` (spell binding). This app's chrome — onyx
+background, house-tinted glow, glass panels, pill controls, Space Grotesk —
+follows the same "APP UI" direction Dusty locked for Spellbinder.
 
 ## Build & run
 - `./build.sh` concatenates `src/head.html` + `src/logo-data.js` + `src/forge.js`
-  into `dist/index.html`, then runs `node --check` on the JS.
-- Zero dependencies, no bundler. `dist/index.html` opens directly in a browser.
-- **Edit `src/` only.** `dist/` is generated — never hand-edit it.
+  into `index.html` at the repo root (so GitHub Pages can serve it directly),
+  then runs `node --check` on the JS.
+- Zero dependencies, no bundler beyond the concat step. `index.html` opens
+  directly in a browser.
+- **Edit `src/` only.** Root `index.html` is generated — never hand-edit it.
+- Firebase project: `blexx-patrons` (Firestore only — no Storage/Functions
+  needed for the Registry). `firebase-config.js` and `firestore.rules` live at
+  the repo root, outside the concat step, so they can be edited without a
+  rebuild. `firebase deploy --only firestore:rules` to push rule changes.
 
 ## Source files
 - `src/head.html` — HTML shell: CSS (design tokens as CSS vars), control-panel

@@ -1,0 +1,15 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // The Patron Registry — public read, create-only. A minted Patron is
+    // permanent; nobody can edit or delete one from the client.
+    match /patrons/{id} {
+      allow read: if true;
+      allow create: if request.resource.data.keys().hasAll(['seed', 'forcedHouse', 'finish', 'house', 'name', 'rank', 'code'])
+                    && request.resource.data.seed is int
+                    && request.resource.data.finish in ['sigil', 'relic']
+                    && request.resource.data.house in ['Chance', 'Manifestation', 'Devotion'];
+      allow update, delete: if false;
+    }
+  }
+}
