@@ -33,7 +33,7 @@ body{margin:0;background:var(--onyx);color:var(--text);font-family:'Space Grotes
 .status-dot.sealed{animation:none;box-shadow:0 0 10px var(--accent)}
 @keyframes pulseDot{0%,100%{opacity:.5;transform:scale(.85)}50%{opacity:1;transform:scale(1.25)}}
 
-.tagline{font-size:13.5px;color:var(--text-dim);line-height:1.6;margin:14px 0 22px;max-width:54ch}
+.tagline{font-size:13px;color:var(--text-dim);line-height:1.6;margin:14px 0 22px;text-align:center;white-space:nowrap}
 
 .panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--r-lg);padding:18px 20px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);margin:0 0 16px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
 .ctl-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;align-items:center;margin:0 0 12px}
@@ -93,7 +93,7 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 .mint-hint{text-align:center;font-size:11px;color:var(--text-dim);margin-top:8px;min-height:14px}
 
 .registry-section{margin-top:40px}
-.section-label{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline}
+.section-label{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim);font-weight:700;margin-bottom:10px;display:flex;justify-content:center;align-items:baseline;gap:10px}
 .feed-container{display:flex;gap:12px;overflow-x:auto;padding:6px 2px 14px;scrollbar-width:thin;scrollbar-color:rgba(255,255,255,.15) transparent}
 .feed-container::-webkit-scrollbar{height:5px}
 .feed-container::-webkit-scrollbar-track{background:transparent}
@@ -112,6 +112,7 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
   .wrap{padding:24px 14px 48px}
   .top-hud{flex-direction:column;align-items:flex-start;gap:8px}
   .mascot-img{display:none}
+  .tagline{white-space:normal}
 }
 </style>
 </head>
