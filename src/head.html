@@ -80,6 +80,17 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 .pop{animation:cardPop .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cardPop{0%{transform:scale(.9);filter:brightness(1.5) saturate(1.25)}60%{transform:scale(1.035)}100%{transform:scale(1);filter:none}}
 
+/* idle motion — main stage card only; Registry thumbs stay still */
+#stage svg .patron-idle{transform-box:fill-box;transform-origin:50% 100%;animation:pBreathe 3.4s ease-in-out infinite}
+#stage svg .wing{transform-box:fill-box;transform-origin:100% 35%;animation:pFlutter 3.4s ease-in-out infinite}
+#stage svg .eyes{transform-box:fill-box;transform-origin:50% 50%;animation:pBlink 5.6s linear infinite}
+@keyframes pBreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.014,.982)}}
+@keyframes pFlutter{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-4deg)}}
+@keyframes pBlink{0%,91%,95.5%,100%{transform:scaleY(1)}93%{transform:scaleY(.12)}}
+@media (prefers-reduced-motion:reduce){
+  #stage svg .patron-idle,#stage svg .wing,#stage svg .eyes{animation:none}
+}
+
 .details-toggle{display:block;margin:14px auto 0;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;padding:6px 10px}
 .details-toggle:hover{color:var(--text)}
 .options-panel{margin-top:8px;padding-top:14px;border-top:1px solid var(--panel-border)}

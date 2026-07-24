@@ -80,6 +80,17 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 .pop{animation:cardPop .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cardPop{0%{transform:scale(.9);filter:brightness(1.5) saturate(1.25)}60%{transform:scale(1.035)}100%{transform:scale(1);filter:none}}
 
+/* idle motion — main stage card only; Registry thumbs stay still */
+#stage svg .patron-idle{transform-box:fill-box;transform-origin:50% 100%;animation:pBreathe 3.4s ease-in-out infinite}
+#stage svg .wing{transform-box:fill-box;transform-origin:100% 35%;animation:pFlutter 3.4s ease-in-out infinite}
+#stage svg .eyes{transform-box:fill-box;transform-origin:50% 50%;animation:pBlink 5.6s linear infinite}
+@keyframes pBreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.014,.982)}}
+@keyframes pFlutter{0%,100%{transform:rotate(0deg)}50%{transform:rotate(-4deg)}}
+@keyframes pBlink{0%,91%,95.5%,100%{transform:scaleY(1)}93%{transform:scaleY(.12)}}
+@media (prefers-reduced-motion:reduce){
+  #stage svg .patron-idle,#stage svg .wing,#stage svg .eyes{animation:none}
+}
+
 .details-toggle{display:block;margin:14px auto 0;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;padding:6px 10px}
 .details-toggle:hover{color:var(--text)}
 .options-panel{margin-top:8px;padding-top:14px;border-top:1px solid var(--panel-border)}
@@ -231,7 +242,8 @@ function derive(seed,forced){
   const sz=pickSize(r);const wingR=sz[1]===0?0:Math.round(sz[1]+r()*(sz[2]-sz[1]));
   const nr=nameFor(seed,house);
   return{seed,house,flux,wingSize:sz[0],wingR,wingTex:TEX[Math.floor(r()*TEX.length)],ribCount:8+Math.floor(r()*6),
-    fluxPick:FLUX[Math.floor(r()*FLUX.length)],name:nr.name,rank:nr.rank,legions:nr.legions,
+    fluxPick:FLUX[Math.floor(r()*FLUX.length)],mood:Math.floor(r()*4),blush:r()<0.55,
+    name:nr.name,rank:nr.rank,legions:nr.legions,
     code:'A-'+((seed>>>0).toString(36).toUpperCase()),ed:(1+(seed%900))+'/900'};
 }
 function colorsFor(p,finish){
@@ -254,10 +266,30 @@ function logoH(name,cx,cy,color,op){
 const RAD=Math.PI/180;
 function PT(cx,cy,r,d){return [cx+r*Math.cos(d*RAD),cy+r*Math.sin(d*RAD)];}
 function poly(pts,fill,stroke,sw){return `<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="${fill||'none'}"${stroke?` stroke="${stroke}" stroke-width="${sw||3}" stroke-linejoin="round"`:''}/>`;}
+// Rounded-corner polygon with slightly bowed-out sides — the "bubbly" primitive.
+// cr = corner radius, bow = outward bulge of each edge midpoint.
+function blobPath(pts,cr,bow){
+  const n=pts.length;
+  const cx0=pts.reduce((a,p)=>a+p[0],0)/n,cy0=pts.reduce((a,p)=>a+p[1],0)/n;
+  const seg=(A,B)=>{const dx=B[0]-A[0],dy=B[1]-A[1],L=Math.hypot(dx,dy),t=Math.min(cr/L,0.42);
+    return [[A[0]+dx*t,A[1]+dy*t],[B[0]-dx*t,B[1]-dy*t]];};
+  let d='';
+  for(let i=0;i<n;i++){
+    const A=pts[i],B=pts[(i+1)%n],C=pts[(i+2)%n];
+    const e=seg(A,B),A2=e[0],B2=e[1];
+    const mx=(A2[0]+B2[0])/2,my=(A2[1]+B2[1])/2;
+    let nx=mx-cx0,ny=my-cy0;const L=Math.hypot(nx,ny)||1;nx/=L;ny/=L;
+    if(i===0)d+=`M${A2[0].toFixed(1)},${A2[1].toFixed(1)}`;
+    d+=`Q${(mx+nx*bow).toFixed(1)},${(my+ny*bow).toFixed(1)} ${B2[0].toFixed(1)},${B2[1].toFixed(1)}`;
+    const B3=seg(B,C)[0];
+    d+=`Q${B[0].toFixed(1)},${B[1].toFixed(1)} ${B3[0].toFixed(1)},${B3[1].toFixed(1)}`;
+  }
+  return d+'Z';
+}
 function shp(cx,cy,r,shape,fill,stroke,sw){
-  const st=stroke?` stroke="${stroke}" stroke-width="${sw||4}" paint-order="stroke" stroke-linejoin="round"`:'';
-  if(shape==='triangle')return `<polygon points="${cx},${(cy-r).toFixed(1)} ${(cx+r).toFixed(1)},${(cy+r).toFixed(1)} ${(cx-r).toFixed(1)},${(cy+r).toFixed(1)}" fill="${fill}"${st}/>`;
-  if(shape==='square')return `<rect x="${(cx-r).toFixed(1)}" y="${(cy-r).toFixed(1)}" width="${(r*2).toFixed(1)}" height="${(r*2).toFixed(1)}" rx="2" fill="${fill}"${st}/>`;
+  const st=stroke?` stroke="${stroke}" stroke-width="${sw||4}" paint-order="stroke" stroke-linejoin="round" stroke-linecap="round"`:'';
+  if(shape==='triangle')return `<path d="${blobPath([[cx,cy-r],[cx+r,cy+r],[cx-r,cy+r]],r*0.38,r*0.09)}" fill="${fill}"${st}/>`;
+  if(shape==='square')return `<path d="${blobPath([[cx-r,cy-r],[cx+r,cy-r],[cx+r,cy+r],[cx-r,cy+r]],r*0.32,r*0.06)}" fill="${fill}"${st}/>`;
   return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"${st}/>`;
 }
 function ribsTo(fx,fy,pts,style,col){
@@ -274,40 +306,70 @@ function ribsTo(fx,fy,pts,style,col){
   }
   return s;
 }
+// Scalloped edge along a chain of points, bulging away from the focus (fx,fy).
+function scallopEdge(fx,fy,pts,k){
+  let d='';
+  for(let i=0;i<pts.length-1;i++){
+    const a=pts[i],b=pts[i+1],mx=(a[0]+b[0])/2,my=(a[1]+b[1])/2;
+    const dx=mx-fx,dy=my-fy,L=Math.hypot(dx,dy)||1;
+    d+=`Q${(mx+dx/L*k).toFixed(1)},${(my+dy/L*k).toFixed(1)} ${b[0].toFixed(1)},${b[1].toFixed(1)}`;
+  }
+  return d;
+}
 function roundWingL(fx,fy,R,n,style,ink,gr){
   const a0=120,a1=248,pts=[];for(let i=0;i<=n;i++)pts.push(PT(fx,fy,R,a0+(a1-a0)*i/n));
-  let d=`M${fx},${fy}`;pts.forEach(p=>d+=`L${p[0].toFixed(1)},${p[1].toFixed(1)}`);d+='Z';
-  let s=`<path d="${d}" fill="${ink}"/>`+ribsTo(fx,fy,pts,style,gr);
-  let od=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;pts.forEach(p=>od+=`L${p[0].toFixed(1)},${p[1].toFixed(1)}`);
-  s+=`<path d="${od}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`;return s;
+  const k=Math.max(2.5,R*0.07);
+  const edge=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`+scallopEdge(fx,fy,pts,k);
+  let s=`<path d="M${fx},${fy}L${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}${scallopEdge(fx,fy,pts,k)}Z" fill="${ink}"/>`+ribsTo(fx,fy,pts,style,gr);
+  s+=`<path d="${edge}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round" stroke-linecap="round"/>`;return s;
 }
 function pointWingL(fx,fy,R,style,ink,gr){
   const upper=PT(fx,fy,R*0.58,240),tip=PT(fx,fy,R,184),lower=PT(fx,fy,R*0.64,124);
-  let s=poly([[fx,fy],upper,tip,lower],ink);
+  const d=blobPath([[fx,fy],upper,tip,lower],R*0.12,R*0.05);
+  let s=`<path d="${d}" fill="${ink}"/>`;
   s+=ribsTo(fx,fy,[upper,PT(fx,fy,R*0.84,210),tip,PT(fx,fy,R*0.82,158),lower],style,gr);
-  s+=poly([[fx,fy],upper,tip,lower],null,ink,3);return s;
+  s+=`<path d="${d}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`;return s;
 }
 function squareWingL(fx,fy,R,style,ink,gr){
   const topR=[fx,fy-R],corner=[fx-R,fy-R],left=[fx-R,fy-R*0.12];
-  let s=poly([[fx,fy],topR,corner,left],ink);
+  const d=blobPath([[fx,fy],topR,corner,left],R*0.16,R*0.03);
+  let s=`<path d="${d}" fill="${ink}"/>`;
   let edge=[topR];const n1=5;for(let i=1;i<=n1;i++)edge.push([fx-R*i/n1,fy-R]);
   const n2=4;for(let i=1;i<=n2;i++)edge.push([fx-R,(fy-R)+(R*0.88)*i/n2]);
   s+=ribsTo(fx,fy,edge,style,gr);
-  s+=poly([[fx,fy],topR,corner,left],null,ink,3);return s;
+  s+=`<path d="${d}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`;return s;
 }
 function wingLeft(shape,fx,fy,R,n,style,ink,gr){
   if(shape==='pointed')return pointWingL(fx,fy,R,style,ink,gr);
   if(shape==='square')return squareWingL(fx,fy,R,style,ink,gr);
   return roundWingL(fx,fy,R,n,style,ink,gr);
 }
-function face(cx,hy,hr,shape,ink,bg){
-  const eyY=hy+(shape==='triangle'?hr*0.24:0),ex=hr*0.4,erx=Math.max(2.8,hr*0.2),ery=Math.max(3.6,hr*0.26);
+function face(cx,hy,hr,shape,ink,bg,mood,blush){
+  const eyY=hy+(shape==='triangle'?hr*0.24:0),ex=hr*0.4,erx=Math.max(3,hr*0.23),ery=Math.max(4,hr*0.29);
   let s='';
-  s+=`<ellipse cx="${(cx-ex).toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
-  s+=`<ellipse cx="${(cx+ex).toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
-  s+=`<circle cx="${(cx-ex).toFixed(1)}" cy="${(eyY+ery*0.25).toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
-  s+=`<circle cx="${(cx+ex).toFixed(1)}" cy="${(eyY+ery*0.25).toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
-  const my=eyY+ery+3;s+=`<path d="M${(cx-6)},${my.toFixed(1)} Q${cx},${(my+5).toFixed(1)} ${(cx+6)},${my.toFixed(1)}" fill="none" stroke="${ink}" stroke-width="2" stroke-linecap="round"/>`;
+  if(blush){
+    const bly=eyY+ery*0.85,blx=ex+erx+2;
+    s+=`<ellipse cx="${(cx-blx).toFixed(1)}" cy="${bly.toFixed(1)}" rx="3.6" ry="2.1" fill="${bg}" opacity="0.5"/>`;
+    s+=`<ellipse cx="${(cx+blx).toFixed(1)}" cy="${bly.toFixed(1)}" rx="3.6" ry="2.1" fill="${bg}" opacity="0.5"/>`;
+  }
+  s+=`<g class="eyes">`;
+  for(const sgn of [-1,1]){
+    const px=cx+sgn*ex,py=eyY+ery*0.22;
+    s+=`<ellipse cx="${px.toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
+    s+=`<circle cx="${px.toFixed(1)}" cy="${py.toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
+    s+=`<circle cx="${(px-erx*0.2).toFixed(1)}" cy="${(py-erx*0.25).toFixed(1)}" r="${(erx*0.2).toFixed(1)}" fill="${bg}"/>`;
+  }
+  s+=`</g>`;
+  const my=eyY+ery+4;
+  if(mood===1){
+    s+=`<path d="M${(cx-6.5).toFixed(1)},${my.toFixed(1)} A6.5 5.5 0 0 0 ${(cx+6.5).toFixed(1)},${my.toFixed(1)}Z" fill="${bg}"/>`;
+  }else if(mood===2){
+    s+=`<circle cx="${cx}" cy="${(my+2).toFixed(1)}" r="2.6" fill="${bg}"/>`;
+  }else if(mood===3){
+    s+=`<path d="M${cx-8},${my.toFixed(1)} Q${cx-4},${(my+4.5).toFixed(1)} ${cx},${my.toFixed(1)} Q${cx+4},${(my+4.5).toFixed(1)} ${cx+8},${my.toFixed(1)}" fill="none" stroke="${bg}" stroke-width="2.2" stroke-linecap="round"/>`;
+  }else{
+    s+=`<path d="M${cx-7},${my.toFixed(1)} Q${cx},${(my+6).toFixed(1)} ${cx+7},${my.toFixed(1)}" fill="none" stroke="${bg}" stroke-width="2.5" stroke-linecap="round"/>`;
+  }
   return s;
 }
 function topper(cx,hy,hr,kind,ink){
@@ -318,22 +380,25 @@ function topper(cx,hy,hr,kind,ink){
 }
 function drawFigure(p,cc,cfg){
   const cx=120,ink=cc.ink,bg=cc.bg,gr=cc.groove;
-  const hy=104,hr=18,by=178,br=30,plY=268;
-  let s='';
+  // chassis v2: bigger head, chubbier limbs, rounded mound instead of plinth
+  const hy=97,hr=24,by=181,br=32,mndY=260;
+  let wings='';
   if(p.wingR>0){
     const sx=cx-br*0.45,sy=by-br*0.5;
     const wl=wingLeft(cfg.wing,sx,sy,p.wingR,p.ribCount,p.wingTex,ink,gr);
-    s+=wl+`<g transform="translate(240,0) scale(-1,1)">${wl}</g>`;
+    wings=`<g class="wing">${wl}</g><g transform="translate(240,0) scale(-1,1)"><g class="wing">${wl}</g></g>`;
   }
-  const lyTop=by+br*0.4,lw=6,lx=br*0.42,lst=` stroke="${bg}" stroke-width="3" paint-order="stroke"`;
-  s+=`<rect x="${(cx-lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(plY-lyTop).toFixed(1)}" fill="${ink}"${lst}/>`;
-  s+=`<rect x="${(cx+lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(plY-lyTop).toFixed(1)}" fill="${ink}"${lst}/>`;
-  s+=`<rect x="${cx-3.5}" y="${(hy+hr*0.4).toFixed(1)}" width="7" height="${(by-br*0.6-(hy+hr*0.4)).toFixed(1)}" fill="${ink}"${lst}/>`;
-  s+=shp(cx,by,br,cfg.shape,ink,bg,4);
-  s+=shp(cx,hy,hr,cfg.shape,ink,bg,4);
-  s+=topper(cx,hy,hr,cfg.topper,ink);
-  s+=face(cx,hy,hr,cfg.shape,ink,bg);
-  s+=`<rect x="74" y="${plY}" width="92" height="12" rx="2" fill="${ink}"/>`;
+  const lyTop=by+br*0.3,lw=10,lx=br*0.4,lst=` stroke="${bg}" stroke-width="3" paint-order="stroke"`;
+  let body='';
+  body+=`<rect x="${(cx-lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(mndY-lyTop).toFixed(1)}" rx="${lw/2}" fill="${ink}"${lst}/>`;
+  body+=`<rect x="${(cx+lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(mndY-lyTop).toFixed(1)}" rx="${lw/2}" fill="${ink}"${lst}/>`;
+  body+=`<rect x="${cx-5.5}" y="${(hy+hr*0.35).toFixed(1)}" width="11" height="${(by-br*0.55-(hy+hr*0.35)).toFixed(1)}" rx="5" fill="${ink}"${lst}/>`;
+  body+=shp(cx,by,br,cfg.shape,ink,bg,4);
+  body+=shp(cx,hy,hr,cfg.shape,ink,bg,4);
+  body+=topper(cx,hy,hr,cfg.topper,ink);
+  body+=face(cx,hy,hr,cfg.shape,ink,bg,p.mood,p.blush);
+  let s=`<g class="patron-idle">${wings}${body}</g>`;
+  s+=`<ellipse cx="${cx}" cy="${mndY}" rx="48" ry="9" fill="${ink}"/>`;
   return s;
 }
 const ROUND="'Quicksand','Varela Round',system-ui,sans-serif";
