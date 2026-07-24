@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLEXX · Wing System</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600&display=swap');
+body{margin:0;background:#faf8f2;color:#2c2c2a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:760px;margin:0 auto;padding:28px 20px 56px}
+h1{font-size:20px;font-weight:500;margin:0 0 2px}
+.sub{font-size:13px;color:#5f5e5a;margin:0 0 22px}
+h2{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5f5e5a;margin:26px 0 10px;border-bottom:0.5px solid #ddd9cd;padding-bottom:6px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cell svg{width:100%;display:block;border-radius:9px}
+.lab{margin-top:6px;text-align:center;font-family:ui-monospace,Menlo,monospace;font-size:10px;color:#8a8678;text-transform:uppercase;letter-spacing:0.5px}
+</style></head>
+<body><div class="wrap">
+<h1>BLEXX · Wing System</h1>
+<p class="sub">Pleated dropped. Broken reworked into fly-wing venation. Wing size shown as a rollable axis (none / tiny / small / large). Demoed on Manifestation round wings.</p>
+<div id="root"></div>
+</div>
+<script>
+const RAD=Math.PI/180;
+function P(cx,cy,r,d){return [cx+r*Math.cos(d*RAD),cy+r*Math.sin(d*RAD)];}
+function poly(pts,fill,stroke,sw){return `<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="${fill||'none'}"${stroke?` stroke="${stroke}" stroke-width="${sw||3}" stroke-linejoin="round"`:''}/>`;}
+function shp(cx,cy,r,shape,fill,stroke,sw){
+  const st=stroke?` stroke="${stroke}" stroke-width="${sw||4}" paint-order="stroke" stroke-linejoin="round"`:'';
+  if(shape==='triangle')return `<polygon points="${cx},${(cy-r).toFixed(1)} ${(cx+r*0.92).toFixed(1)},${(cy+r*0.66).toFixed(1)} ${(cx-r*0.92).toFixed(1)},${(cy+r*0.66).toFixed(1)}" fill="${fill}"${st}/>`;
+  if(shape==='square')return `<rect x="${(cx-r*0.9).toFixed(1)}" y="${(cy-r*0.9).toFixed(1)}" width="${(r*1.8).toFixed(1)}" height="${(r*1.8).toFixed(1)}" rx="2" fill="${fill}"${st}/>`;
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"${st}/>`;
+}
+function ribsTo(fx,fy,pts,style,col){
+  let s='';
+  if(style==='veined'){
+    for(const p of pts){s+=`<line x1="${fx}" y1="${fy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="${col}" stroke-width="1.4" stroke-linecap="round"/>`;}
+    [0.4,0.66,0.88].forEach(t=>{
+      for(let i=0;i<pts.length-1;i++){
+        const a=[fx+(pts[i][0]-fx)*t,fy+(pts[i][1]-fy)*t],b=[fx+(pts[i+1][0]-fx)*t,fy+(pts[i+1][1]-fy)*t];
+        s+=`<line x1="${a[0].toFixed(1)}" y1="${a[1].toFixed(1)}" x2="${b[0].toFixed(1)}" y2="${b[1].toFixed(1)}" stroke="${col}" stroke-width="1.1" stroke-linecap="round"/>`;
+      }
+    });
+    return s;
+  }
+  for(const p of pts){
+    if(style==='dotted'){[0.42,0.66,0.88].forEach(t=>{const x=fx+(p[0]-fx)*t,y=fy+(p[1]-fy)*t;s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.1" fill="${col}"/>`;});}
+    else if(style==='solid'){}
+    else{s+=`<line x1="${fx}" y1="${fy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="${col}" stroke-width="2" stroke-linecap="round"/>`;}
+  }
+  return s;
+}
+function roundWingL(fx,fy,R,style,ink,gr){
+  const a0=120,a1=248,n=10,pts=[];for(let i=0;i<=n;i++)pts.push(P(fx,fy,R,a0+(a1-a0)*i/n));
+  let d=`M${fx},${fy}`;pts.forEach(p=>d+=`L${p[0].toFixed(1)},${p[1].toFixed(1)}`);d+='Z';
+  let s=`<path d="${d}" fill="${ink}"/>`+ribsTo(fx,fy,pts,style,gr);
+  let od=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;pts.forEach(p=>od+=`L${p[0].toFixed(1)},${p[1].toFixed(1)}`);
+  s+=`<path d="${od}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`;return s;
+}
+function face(cx,hy,hr,shape,ink,bg){
+  const eyY=hy+(shape==='triangle'?hr*0.24:0),ex=hr*0.4,erx=Math.max(2.8,hr*0.2),ery=Math.max(3.6,hr*0.26);
+  let s='';
+  s+=`<ellipse cx="${(cx-ex).toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
+  s+=`<ellipse cx="${(cx+ex).toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
+  s+=`<circle cx="${(cx-ex).toFixed(1)}" cy="${(eyY+ery*0.25).toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
+  s+=`<circle cx="${(cx+ex).toFixed(1)}" cy="${(eyY+ery*0.25).toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
+  const my=eyY+ery+2.5;s+=`<path d="M${(cx-5)},${my.toFixed(1)} Q${cx},${(my+4).toFixed(1)} ${(cx+5)},${my.toFixed(1)}" fill="none" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
+  return s;
+}
+function topper(cx,hy,hr,kind,ink){
+  if(kind==='spark'){const y=hy-hr*1.6,a=hr*0.62;return `<path d="M${cx},${(y-a).toFixed(1)} L${(cx+a*0.3).toFixed(1)},${(y-a*0.3).toFixed(1)} L${(cx+a).toFixed(1)},${y.toFixed(1)} L${(cx+a*0.3).toFixed(1)},${(y+a*0.3).toFixed(1)} L${cx},${(y+a).toFixed(1)} L${(cx-a*0.3).toFixed(1)},${(y+a*0.3).toFixed(1)} L${(cx-a).toFixed(1)},${y.toFixed(1)} L${(cx-a*0.3).toFixed(1)},${(y-a*0.3).toFixed(1)} Z" fill="${ink}"/>`;}
+  return '';
+}
+function creature(o){
+  const cx=110,ink=o.ink,bg=o.bg,gr=o.bg;
+  const hy=84,hr=16,by=150,br=26,R=o.R;
+  let s='';
+  if(R>0){
+    const sx=cx-br*0.45,sy=by-br*0.5;
+    const wl=roundWingL(sx,sy,R,o.ribStyle,ink,gr);
+    s+=wl+`<g transform="translate(220,0) scale(-1,1)">${wl}</g>`;
+  }
+  const lyTop=by+br*0.5,lw=6,lx=br*0.42,lst=` stroke="${bg}" stroke-width="3" paint-order="stroke"`;
+  s+=`<rect x="${(cx-lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(226-lyTop).toFixed(1)}" fill="${ink}"${lst}/>`;
+  s+=`<rect x="${(cx+lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(226-lyTop).toFixed(1)}" fill="${ink}"${lst}/>`;
+  s+=`<rect x="${cx-3.5}" y="${(hy+hr*0.4).toFixed(1)}" width="7" height="${(by-br*0.6-(hy+hr*0.4)).toFixed(1)}" fill="${ink}"${lst}/>`;
+  s+=shp(cx,by,br,'circle',ink,bg,4);
+  s+=shp(cx,hy,hr,'circle',ink,bg,4);
+  s+=topper(cx,hy,hr,'spark',ink);
+  s+=face(cx,hy,hr,'circle',ink,bg);
+  s+=`<rect x="58" y="226" width="104" height="11" rx="2" fill="${ink}"/>`;
+  return s;
+}
+const MA={bg:'#405eab',ink:'#71ccd4'};
+function cellSvg(inner){return `<svg viewBox="0 0 220 250" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="220" height="250" rx="9" fill="${MA.bg}"/><rect x="8" y="8" width="204" height="234" rx="6" fill="none" stroke="${MA.ink}" stroke-width="1" opacity="0.5"/>${inner}</svg>`;}
+let html='<h2>Wing textures (size large)</h2><div class="g4">';
+['straight','veined','dotted','solid'].forEach(st=>{
+  html+=`<div class="cell">${cellSvg(creature({ink:MA.ink,bg:MA.bg,R:78,ribStyle:st}))}<div class="lab">${st}</div></div>`;
+});
+html+='</div><h2>Wing size — rollable</h2><div class="g4">';
+[['none',0],['tiny',34],['small',54],['large',82]].forEach(([nm,R])=>{
+  html+=`<div class="cell">${cellSvg(creature({ink:MA.ink,bg:MA.bg,R:R,ribStyle:'straight'}))}<div class="lab">${nm}</div></div>`;
+});
+html+='</div>';
+document.getElementById('root').innerHTML=html;
+</script></body></html>

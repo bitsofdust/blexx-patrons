@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>BLEXX · Three Houses</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600&display=swap');
+body{margin:0;background:#faf8f2;color:#2c2c2a;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.5}
+.wrap{max-width:720px;margin:0 auto;padding:28px 20px 56px}
+h1{font-size:20px;font-weight:500;margin:0 0 2px}
+.sub{font-size:13px;color:#5f5e5a;margin:0 0 22px}
+h2{font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:#5f5e5a;margin:26px 0 10px;border-bottom:0.5px solid #ddd9cd;padding-bottom:6px}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.cell svg{width:100%;display:block;border-radius:10px}
+.lab{margin-top:7px;text-align:center}
+.code{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:#8a8678;letter-spacing:1px}
+.nm{font-family:'Quicksand',sans-serif;font-weight:600;font-size:14px}
+</style></head>
+<body><div class="wrap">
+<h1>BLEXX · Three Houses</h1>
+<p class="sub">Devotion angel now has the small face + halo; Manifestation gets its own topper instead; feet removed, legs straight to the plinth on all three.</p>
+<div id="root"></div>
+</div>
+<script>
+const RAD=Math.PI/180;
+function P(cx,cy,r,d){return [cx+r*Math.cos(d*RAD),cy+r*Math.sin(d*RAD)];}
+function poly(pts,fill,stroke,sw){return `<polygon points="${pts.map(p=>p[0].toFixed(1)+','+p[1].toFixed(1)).join(' ')}" fill="${fill||'none'}"${stroke?` stroke="${stroke}" stroke-width="${sw||3}" stroke-linejoin="round"`:''}/>`;}
+function shp(cx,cy,r,shape,fill){
+  if(shape==='triangle')return poly([[cx,cy-r],[cx+r*0.92,cy+r*0.66],[cx-r*0.92,cy+r*0.66]],fill);
+  if(shape==='square')return `<rect x="${(cx-r*0.9).toFixed(1)}" y="${(cy-r*0.9).toFixed(1)}" width="${(r*1.8).toFixed(1)}" height="${(r*1.8).toFixed(1)}" rx="2" fill="${fill}"/>`;
+  return `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${fill}"/>`;
+}
+function ribsTo(fx,fy,pts,style,col){
+  let s='';
+  for(const p of pts){
+    if(style==='dotted'){[0.42,0.66,0.88].forEach(t=>{const x=fx+(p[0]-fx)*t,y=fy+(p[1]-fy)*t;s+=`<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.1" fill="${col}"/>`;});}
+    else if(style==='solid'){}
+    else if(style==='broken'){s+=`<line x1="${fx}" y1="${fy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="${col}" stroke-width="2.2" stroke-dasharray="5 4" stroke-linecap="round"/>`;}
+    else if(style==='pleated'){const mx=(fx+p[0])/2,my=(fy+p[1])/2,dx=p[0]-fx,dy=p[1]-fy,L=Math.hypot(dx,dy)||1;s+=`<path d="M${fx},${fy} Q${(mx-dy/L*6).toFixed(1)},${(my+dx/L*6).toFixed(1)} ${p[0].toFixed(1)},${p[1].toFixed(1)}" fill="none" stroke="${col}" stroke-width="2.1" stroke-linecap="round"/>`;}
+    else{s+=`<line x1="${fx}" y1="${fy}" x2="${p[0].toFixed(1)}" y2="${p[1].toFixed(1)}" stroke="${col}" stroke-width="2" stroke-linecap="round"/>`;}
+  }
+  return s;
+}
+function roundWingL(fx,fy,R,style,ink,gr){
+  const a0=120,a1=248,n=9,pts=[];for(let i=0;i<=n;i++)pts.push(P(fx,fy,R,a0+(a1-a0)*i/n));
+  let d=`M${fx},${fy}`;pts.forEach(p=>d+=`L${p[0].toFixed(1)},${p[1].toFixed(1)}`);d+='Z';
+  let s=`<path d="${d}" fill="${ink}"/>`+ribsTo(fx,fy,pts,style,gr);
+  let od=`M${pts[0][0].toFixed(1)},${pts[0][1].toFixed(1)}`;pts.forEach(p=>od+=`L${p[0].toFixed(1)},${p[1].toFixed(1)}`);
+  s+=`<path d="${od}" fill="none" stroke="${ink}" stroke-width="3" stroke-linejoin="round"/>`;return s;
+}
+function pointWingL(fx,fy,R,style,ink,gr){
+  const upper=P(fx,fy,R*0.58,240),tip=P(fx,fy,R,184),lower=P(fx,fy,R*0.64,124);
+  let s=poly([[fx,fy],upper,tip,lower],ink);
+  s+=ribsTo(fx,fy,[upper,P(fx,fy,R*0.84,210),tip,P(fx,fy,R*0.82,158),lower],style,gr);
+  s+=poly([[fx,fy],upper,tip,lower],null,ink,3);return s;
+}
+function face(cx,hy,hr,shape,ink,bg){
+  const eyY=hy+(shape==='triangle'?hr*0.24:0),ex=hr*0.4,erx=Math.max(2.8,hr*0.2),ery=Math.max(3.6,hr*0.26);
+  let s='';
+  s+=`<ellipse cx="${(cx-ex).toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
+  s+=`<ellipse cx="${(cx+ex).toFixed(1)}" cy="${eyY.toFixed(1)}" rx="${erx.toFixed(1)}" ry="${ery.toFixed(1)}" fill="${bg}"/>`;
+  s+=`<circle cx="${(cx-ex).toFixed(1)}" cy="${(eyY+ery*0.25).toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
+  s+=`<circle cx="${(cx+ex).toFixed(1)}" cy="${(eyY+ery*0.25).toFixed(1)}" r="${(erx*0.55).toFixed(1)}" fill="${ink}"/>`;
+  const my=eyY+ery+2.5;s+=`<path d="M${(cx-5)},${my.toFixed(1)} Q${cx},${(my+4).toFixed(1)} ${(cx+5)},${my.toFixed(1)}" fill="none" stroke="${ink}" stroke-width="1.8" stroke-linecap="round"/>`;
+  return s;
+}
+function topper(cx,hy,hr,kind,ink){
+  if(kind==='halo')return `<ellipse cx="${cx}" cy="${(hy-hr*1.5).toFixed(1)}" rx="${(hr*1.05).toFixed(1)}" ry="${(hr*0.34).toFixed(1)}" fill="none" stroke="${ink}" stroke-width="2.6"/>`;
+  if(kind==='orb')return `<circle cx="${cx}" cy="${(hy-hr*1.55).toFixed(1)}" r="${(hr*0.42).toFixed(1)}" fill="${ink}"/>`;
+  if(kind==='spark'){const y=hy-hr*1.55,a=hr*0.6;return `<path d="M${cx},${(y-a).toFixed(1)} L${(cx+a*0.3).toFixed(1)},${(y-a*0.3).toFixed(1)} L${(cx+a).toFixed(1)},${y.toFixed(1)} L${(cx+a*0.3).toFixed(1)},${(y+a*0.3).toFixed(1)} L${cx},${(y+a).toFixed(1)} L${(cx-a*0.3).toFixed(1)},${(y+a*0.3).toFixed(1)} L${(cx-a).toFixed(1)},${y.toFixed(1)} L${(cx-a*0.3).toFixed(1)},${(y-a*0.3).toFixed(1)} Z" fill="${ink}"/>`;}
+  if(kind==='antenna'){const y=hy-hr;return `<line x1="${cx}" y1="${y.toFixed(1)}" x2="${cx}" y2="${(y-hr*0.85).toFixed(1)}" stroke="${ink}" stroke-width="3" stroke-linecap="round"/><circle cx="${cx}" cy="${(y-hr*1.0).toFixed(1)}" r="${(hr*0.34).toFixed(1)}" fill="${ink}"/>`;}
+  if(kind==='nubs')return `<circle cx="${(cx-hr*0.5).toFixed(1)}" cy="${(hy-hr*0.5).toFixed(1)}" r="3.4" fill="${ink}"/><circle cx="${(cx+hr*0.5).toFixed(1)}" cy="${(hy-hr*0.5).toFixed(1)}" r="3.4" fill="${ink}"/>`;
+  return '';
+}
+/* small standing creatures (Impkin / Orblet) */
+function drawCreature(o){
+  const cx=110,ink=o.ink,bg=o.bg,gr=o.bg;
+  const hy=o.headY||82,hr=o.headR,by=o.bodyY||152,br=o.bodyR,R=76;
+  let s='';
+  const sx=cx-br*0.45,sy=by-br*0.5;
+  const wl=o.pointed?pointWingL(sx,sy,R,o.ribStyle,ink,gr):roundWingL(sx,sy,R,o.ribStyle,ink,gr);
+  s+=wl+`<g transform="translate(220,0) scale(-1,1)">${wl}</g>`;
+  const lyTop=by+br*0.5,lw=6,lx=br*0.42;
+  s+=`<rect x="${(cx-lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(226-lyTop).toFixed(1)}" fill="${ink}"/>`;
+  s+=`<rect x="${(cx+lx-lw/2).toFixed(1)}" y="${lyTop.toFixed(1)}" width="${lw}" height="${(226-lyTop).toFixed(1)}" fill="${ink}"/>`;
+  s+=`<rect x="${cx-3.5}" y="${(hy+hr*0.4).toFixed(1)}" width="7" height="${(by-br*0.6-(hy+hr*0.4)).toFixed(1)}" fill="${ink}"/>`;
+  s+=shp(cx,by,br,o.bodyShape,ink);
+  s+=shp(cx,hy,hr,o.headShape,ink);
+  s+=topper(cx,hy,hr,o.topper,ink);
+  s+=face(cx,hy,hr,o.headShape,ink,bg);
+  s+=`<rect x="58" y="226" width="104" height="11" rx="2" fill="${ink}"/>`;
+  return s;
+}
+/* tall winged angel (Devotion) */
+function drawDevotion(ink,bg,style){
+  const cx=110,hy=74,hr=16,gr=bg;let s='';
+  const fx=cx-6,fy=138,R=74;
+  const wl=roundWingL(fx,fy,R,style,ink,gr);
+  s+=wl+`<g transform="translate(220,0) scale(-1,1)">${wl}</g>`;
+  s+=`<rect x="${cx-18}" y="150" width="9" height="76" fill="${ink}"/><rect x="${cx+9}" y="150" width="9" height="76" fill="${ink}"/>`;
+  s+=`<rect x="${cx-4}" y="${(hy+hr*0.6).toFixed(1)}" width="8" height="${(148-(hy+hr*0.6)).toFixed(1)}" fill="${ink}"/>`;
+  s+=`<rect x="${cx-26}" y="146" width="52" height="11" rx="2" fill="${ink}"/>`;
+  s+=shp(cx,hy,hr,'square',ink);
+  s+=topper(cx,hy,hr,'halo',ink);
+  s+=face(cx,hy,hr,'square',ink,bg);
+  s+=`<rect x="58" y="226" width="104" height="11" rx="2" fill="${ink}"/>`;
+  return s;
+}
+const CH={bg:'#ed2024',ink:'#ebe71e'};const MA={bg:'#405eab',ink:'#71ccd4'};const DE={bg:'#882782',ink:'#ee1f42'};
+function cell(code,nm,bg,inner){return `<div class="cell"><svg viewBox="0 0 220 250" xmlns="http://www.w3.org/2000/svg"><rect x="0" y="0" width="220" height="250" rx="10" fill="${bg}"/><rect x="9" y="9" width="202" height="232" rx="7" fill="none" stroke="${arguments[4]||'#ffffff'}" stroke-width="1" opacity="0.5"/>${inner}</svg><div class="lab"><span class="code">${code}</span> &middot; <span class="nm">${nm}</span></div></div>`;}
+const impkin=drawCreature({ink:CH.ink,bg:CH.bg,headShape:'triangle',headR:16,bodyShape:'triangle',bodyR:26,pointed:true,topper:'nubs',ribStyle:'straight'});
+const orbletOrb=drawCreature({ink:MA.ink,bg:MA.bg,headShape:'circle',headR:17,bodyShape:'circle',bodyR:27,pointed:false,topper:'orb',ribStyle:'straight'});
+const orbletSpark=drawCreature({ink:MA.ink,bg:MA.bg,headShape:'circle',headR:17,bodyShape:'circle',bodyR:27,pointed:false,topper:'spark',ribStyle:'straight'});
+const orbletAnt=drawCreature({ink:MA.ink,bg:MA.bg,headShape:'circle',headR:17,bodyShape:'circle',bodyR:27,pointed:false,topper:'antenna',ribStyle:'straight'});
+const devo=drawDevotion(DE.ink,DE.bg,'straight');
+let html='';
+html+=`<h2>The three Houses</h2><div class="grid">`;
+html+=cell('Chance','Impkin',CH.bg,impkin,CH.ink);
+html+=cell('Manifestation','Orblet',MA.bg,orbletOrb,MA.ink);
+html+=cell('Devotion','Angel',DE.bg,devo,DE.ink);
+html+=`</div>`;
+html+=`<h2>Manifestation topper — pick one</h2><div class="grid">`;
+html+=cell('O-a','Orb',MA.bg,orbletOrb,MA.ink);
+html+=cell('O-b','Spark',MA.bg,orbletSpark,MA.ink);
+html+=cell('O-c','Antenna',MA.bg,orbletAnt,MA.ink);
+html+=`</div>`;
+document.getElementById('root').innerHTML=html;
+</script></body></html>

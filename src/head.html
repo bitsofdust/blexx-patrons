@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BLEXX · Angel Forge</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@500;600;700&display=swap');
+:root{
+  --color-border-secondary:rgba(20,19,15,0.3);--color-border-tertiary:rgba(20,19,15,0.15);
+  --color-background-secondary:#f1efe8;--color-text-secondary:#5f5e5a;--color-text-primary:#2c2c2a;
+  --border-radius-md:8px;--border-radius-lg:12px;
+}
+*{box-sizing:border-box}
+body{margin:0;background:#faf8f2;color:var(--color-text-primary);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;line-height:1.6}
+.wrap{max-width:700px;margin:0 auto;padding:28px 20px 48px}
+h1{font-size:20px;font-weight:500;margin:0 0 2px}
+.sub{font-size:13px;color:var(--color-text-secondary);margin:0 0 22px}
+button,select,input{font:inherit;font-size:13px;padding:7px 12px;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);background:#fff;cursor:pointer;color:var(--color-text-primary)}
+input{cursor:text}
+button:hover,select:hover{background:var(--color-background-secondary)}
+button:active{transform:scale(0.98)}
+.seg{display:inline-flex;border:0.5px solid var(--color-border-secondary);border-radius:var(--border-radius-md);overflow:hidden}
+.seg button{border:none;border-radius:0;border-right:0.5px solid var(--color-border-tertiary);background:transparent;padding:7px 12px}
+.seg button:last-child{border-right:none}
+.seg button[aria-pressed="true"]{background:var(--color-background-secondary);font-weight:500}
+.ctl-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
+.ctl-lab{font-size:12px;color:var(--color-text-secondary);margin-right:2px}
+#stage{display:flex;justify-content:center;margin-top:6px}
+#sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:var(--color-background-secondary);padding:12px;border-radius:var(--border-radius-lg)}
+.meta{margin-top:10px;font-size:12px;color:var(--color-text-secondary);text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace}
+.legend{display:flex;gap:16px;justify-content:center;margin:4px 0 18px;font-size:12px;color:var(--color-text-secondary);flex-wrap:wrap}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>BLEXX · Angel Forge</h1>
+<p class="sub">Three Houses, three creatures. Shape, wings, and topper by House; size, texture, name, rank, and finish by the roll.</p>
+<div class="ctl-row">
+  <span class="ctl-lab">House</span>
+  <select id="house"><option selected>All</option><option>Chance</option><option>Manifestation</option><option>Devotion</option></select>
+  <span class="ctl-lab">Finish</span>
+  <span class="seg" id="finish">
+    <button data-v="sigil" aria-pressed="true">Sigil</button>
+    <button data-v="relic" aria-pressed="false">Relic</button>
+  </span>
+  <button id="reroll" style="font-weight:500">&#8635; Reroll</button>
+  <span class="seg" id="mode" style="margin-left:auto">
+    <button data-v="single" aria-pressed="true">Single</button>
+    <button data-v="sheet" aria-pressed="false">9-up sheet</button>
+  </span>
+</div>
+<div class="ctl-row">
+  <span class="ctl-lab">Seed</span>
+  <input id="seedfield" type="number" inputmode="numeric" min="0" style="width:140px;font-family:ui-monospace,Menlo,monospace">
+  <button id="go">Lock seed</button>
+  <span class="ctl-lab" id="seedhint"></span>
+</div>
+<div class="legend">
+  <span><svg width="14" height="14" viewBox="0 0 14 14"><path d="M7 1 L13 12 L1 12 Z" fill="#ed2024"/></svg> Chance</span>
+  <span><svg width="14" height="14" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#405eab"/></svg> Manifestation</span>
+  <span><svg width="14" height="14" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="#882782"/></svg> Devotion</span>
+</div>
+<div id="stage"></div>
+<div class="meta" id="meta"></div>
+</div>

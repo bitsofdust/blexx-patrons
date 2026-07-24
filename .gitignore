@@ -1,0 +1,5 @@
+.DS_Store
+node_modules/
+/tmp/
+_blexx_check.js
+*.log
