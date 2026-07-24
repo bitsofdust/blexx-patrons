@@ -65,7 +65,9 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 
 .showcase{position:relative;display:flex;align-items:center;justify-content:center;gap:36px;padding:32px;background:rgba(4,4,5,.5);border:1px solid var(--panel-border);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 30px 60px rgba(0,0,0,.5);transition:box-shadow .5s ease;overflow:hidden}
 .showcase.sealing{box-shadow:0 0 44px var(--accent-glow),0 0 0 1px rgba(255,255,255,.03) inset,0 30px 60px rgba(0,0,0,.5)}
-.mascot-img{width:220px;max-width:34%;height:auto;flex-shrink:0;opacity:.95;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));transition:opacity .3s ease}
+.card-back-wrap{position:relative;width:220px;max-width:34%;flex-shrink:0}
+.card-back-wrap svg{display:block;width:100%;height:auto;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5))}
+.card-back-mascot{position:absolute;left:50%;top:49%;width:52%;aspect-ratio:1;transform:translate(-50%,-50%);-webkit-mask-image:var(--mascot-src);mask-image:var(--mascot-src);-webkit-mask-size:contain;mask-size:contain;-webkit-mask-repeat:no-repeat;mask-repeat:no-repeat;-webkit-mask-position:center;mask-position:center;background-color:var(--mascot-color,var(--cream))}
 
 .stage-wrap{position:relative;display:flex;justify-content:center;flex-shrink:0}
 #stage{position:relative;z-index:1;width:100%;display:flex;justify-content:center}
@@ -111,7 +113,7 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 @media (max-width:620px){
   .wrap{padding:24px 14px 48px}
   .top-hud{flex-direction:column;align-items:flex-start;gap:8px}
-  .mascot-img{display:none}
+  .card-back-wrap{display:none}
   .tagline{white-space:normal}
 }
 </style>
@@ -161,7 +163,10 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
   </div>
 
   <div class="showcase" id="showcase">
-    <img class="mascot-img" id="stageMascot" alt="">
+    <div class="card-back-wrap">
+      <svg id="cardBackSvg" viewBox="0 0 240 360" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="card-back-mascot" id="stageMascot"></div>
+    </div>
     <div class="stage-wrap" id="stageWrap">
       <div class="stage-flash" id="stageFlash"></div>
       <div id="stage"></div>

@@ -163,6 +163,17 @@ function card(p,finish,px,uid){
   s+=logoH(hn,120,333,labelCol);
   s+=`</svg>`;return{svg:s,c:c};
 }
+function cardBackSVG(house){
+  const h=HOUSES[house],hn=house.toLowerCase(),pid='cbp-'+hn;
+  let s=`<defs><pattern id="${pid}" width="46" height="46" patternUnits="userSpaceOnUse" patternTransform="rotate(18)">`
+    +logo('blexx',23,23,26,h.ink,0.14)+`</pattern></defs>`;
+  s+=`<rect x="0" y="0" width="240" height="360" rx="10" fill="${h.bg}"/>`;
+  s+=`<rect x="0" y="0" width="240" height="360" rx="10" fill="url(#${pid})"/>`;
+  s+=`<rect x="14" y="14" width="212" height="332" rx="6" fill="none" stroke="${h.frame}" stroke-width="2" opacity="0.55"/>`;
+  s+=logo('blexx',120,31,87,h.ink,0.92);
+  s+=logoH(hn,120,333,h.ink);
+  return s;
+}
 // ------------------------------------------------------------------
 // FIREBASE (optional) — the Patron Registry. Configured via
 // firebase-config.js. When absent, minted Patrons live in this
@@ -195,7 +206,7 @@ const showcase=document.getElementById('showcase'),stageFlash=document.getElemen
 const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
 const mintBtn=document.getElementById('mintBtn'),mintHint=document.getElementById('mintHint');
 const feedEl=document.getElementById('feed'),registryCount=document.getElementById('registryCount');
-const stageMascot=document.getElementById('stageMascot');
+const stageMascot=document.getElementById('stageMascot'),cardBackSvg=document.getElementById('cardBackSvg');
 
 function flashStage(kind){
   stageFlash.classList.remove('roll','seal');void stageFlash.offsetWidth;
@@ -222,7 +233,10 @@ function render(flash){
   seedfield.value=state.seed;
   const p=derive(state.seed,state.house);
   document.body.className='house-'+p.house.toLowerCase();
-  stageMascot.src='assets/mascots/'+p.house.toLowerCase()+'_mascot.svg';
+  const hn=p.house.toLowerCase(),h=HOUSES[p.house];
+  cardBackSvg.innerHTML=cardBackSVG(p.house);
+  stageMascot.style.setProperty('--mascot-src',`url('assets/mascots/${hn}_mascot.svg')`);
+  stageMascot.style.setProperty('--mascot-color',h.ink);
   const out=card(p,state.finish,300,'h'+state.seed);
   stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
   seedhint.textContent=`= ${p.code}`;
