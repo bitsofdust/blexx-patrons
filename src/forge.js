@@ -239,11 +239,11 @@ document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random
 document.querySelectorAll('#house button').forEach(b=>b.onclick=()=>{state.house=b.dataset.v;syncPills('house',state.house);render(true);});
 document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;syncPills('finish',state.finish);render(true);});
 
-const detailsToggle=document.getElementById('detailsToggle'),detailsPanel=document.getElementById('detailsPanel');
-detailsToggle.onclick=()=>{
-  const open=detailsPanel.hidden;
-  detailsPanel.hidden=!open;
-  detailsToggle.innerHTML=open?'Hide details &#8963;':'Show details &#8964;';
+const optionsToggle=document.getElementById('optionsToggle'),optionsPanel=document.getElementById('optionsPanel');
+optionsToggle.onclick=()=>{
+  const open=optionsPanel.hidden;
+  optionsPanel.hidden=!open;
+  optionsToggle.innerHTML=open?'Customize &#8963;':'Customize &#8964;';
 };
 
 // ------------------------------------------------------------------

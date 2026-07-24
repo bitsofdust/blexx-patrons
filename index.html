@@ -36,7 +36,7 @@ body{margin:0;background:var(--onyx);color:var(--text);font-family:'Space Grotes
 .tagline{font-size:13.5px;color:var(--text-dim);line-height:1.6;margin:14px 0 22px;max-width:54ch}
 
 .panel{background:var(--panel);border:1px solid var(--panel-border);border-radius:var(--r-lg);padding:18px 20px;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);margin:0 0 16px;box-shadow:0 20px 40px rgba(0,0,0,.35)}
-.ctl-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:0 0 12px}
+.ctl-row{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;align-items:center;margin:0 0 12px}
 .ctl-row:last-child{margin-bottom:0}
 .ctl-lab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-right:2px;font-weight:700}
 
@@ -78,11 +78,11 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 .pop{animation:cardPop .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cardPop{0%{transform:scale(.9);filter:brightness(1.5) saturate(1.25)}60%{transform:scale(1.035)}100%{transform:scale(1);filter:none}}
 
-.details-toggle{display:block;margin:16px auto 0;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;padding:6px 10px}
+.details-toggle{display:block;margin:14px auto 0;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;padding:6px 10px}
 .details-toggle:hover{color:var(--text)}
-.details-panel{margin-top:4px}
-.details-panel[hidden]{display:none}
-.meta{font-size:11.5px;color:var(--text-dim);text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em}
+.options-panel{margin-top:8px;padding-top:14px;border-top:1px solid var(--panel-border)}
+.options-panel[hidden]{display:none}
+.meta{margin-top:14px;font-size:11.5px;color:var(--text-dim);text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em}
 .recall-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--panel-border)}
 
 .mint-btn{display:block;width:100%;margin-top:18px;padding:16px 24px;background:var(--cream);color:#17140f;border:none;border-radius:var(--r-pill);font:inherit;font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1)}
@@ -131,23 +131,32 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
   <p class="tagline">Three Houses, one winged Patron per seed. Summon to preview, choose a finish, then bind it into the Registry.</p>
 
   <div class="panel">
-    <div class="ctl-row">
-      <span class="ctl-lab">House</span>
-      <div class="swatch-row" id="house">
-        <button data-v="All" aria-pressed="true" class="swatch active"><span class="swatch-chip all-chip"></span>All</button>
-        <button data-v="Chance" class="swatch" style="--sw-color:#ed2024;--sw-glow:rgba(237,32,36,.4)"><span class="swatch-chip" style="background:#ed2024"></span>Chance</button>
-        <button data-v="Manifestation" class="swatch" style="--sw-color:#405eab;--sw-glow:rgba(64,94,171,.4)"><span class="swatch-chip" style="background:#405eab"></span>Manifestation</button>
-        <button data-v="Devotion" class="swatch" style="--sw-color:#882782;--sw-glow:rgba(136,39,130,.4)"><span class="swatch-chip" style="background:#882782"></span>Devotion</button>
-      </div>
-    </div>
-    <div class="ctl-row">
-      <span class="ctl-lab">Finish</span>
-      <div class="swatch-row" id="finish">
-        <button data-v="sigil" aria-pressed="true" class="swatch active"><span class="swatch-chip sigil-chip"></span>Sigil</button>
-        <button data-v="relic" class="swatch" style="--sw-color:#bdb8a8;--sw-glow:rgba(189,184,168,.4)"><span class="swatch-chip relic-chip"></span>Relic</button>
-      </div>
-    </div>
     <button id="reroll" class="summon-btn">&#8635; SUMMON A PATRON</button>
+    <button id="optionsToggle" class="details-toggle">Customize &#8964;</button>
+    <div class="options-panel" id="optionsPanel" hidden>
+      <div class="ctl-row">
+        <span class="ctl-lab">House</span>
+        <div class="swatch-row" id="house">
+          <button data-v="All" aria-pressed="true" class="swatch active"><span class="swatch-chip all-chip"></span>All</button>
+          <button data-v="Chance" class="swatch" style="--sw-color:#ed2024;--sw-glow:rgba(237,32,36,.4)"><span class="swatch-chip" style="background:#ed2024"></span>Chance</button>
+          <button data-v="Manifestation" class="swatch" style="--sw-color:#405eab;--sw-glow:rgba(64,94,171,.4)"><span class="swatch-chip" style="background:#405eab"></span>Manifestation</button>
+          <button data-v="Devotion" class="swatch" style="--sw-color:#882782;--sw-glow:rgba(136,39,130,.4)"><span class="swatch-chip" style="background:#882782"></span>Devotion</button>
+        </div>
+      </div>
+      <div class="ctl-row">
+        <span class="ctl-lab">Finish</span>
+        <div class="swatch-row" id="finish">
+          <button data-v="sigil" aria-pressed="true" class="swatch active"><span class="swatch-chip sigil-chip"></span>Sigil</button>
+          <button data-v="relic" class="swatch" style="--sw-color:#bdb8a8;--sw-glow:rgba(189,184,168,.4)"><span class="swatch-chip relic-chip"></span>Relic</button>
+        </div>
+      </div>
+      <div class="recall-row">
+        <span class="ctl-lab">Recall seed</span>
+        <input id="seedfield" type="number" inputmode="numeric" min="0">
+        <button id="go" class="ghost-btn small">Recall</button>
+        <span class="ctl-lab" id="seedhint"></span>
+      </div>
+    </div>
   </div>
 
   <div class="showcase" id="showcase">
@@ -158,19 +167,9 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
     </div>
   </div>
 
-  <button id="mintBtn" class="mint-btn" hidden>&#10038; BIND THIS PATRON</button>
+  <button id="mintBtn" class="mint-btn" hidden>BIND THIS PATRON</button>
   <p class="mint-hint" id="mintHint"></p>
-
-  <button id="detailsToggle" class="details-toggle">Show details &#8964;</button>
-  <div class="details-panel" id="detailsPanel" hidden>
-    <div class="meta" id="meta"></div>
-    <div class="recall-row">
-      <span class="ctl-lab">Recall seed</span>
-      <input id="seedfield" type="number" inputmode="numeric" min="0">
-      <button id="go" class="ghost-btn small">Recall</button>
-      <span class="ctl-lab" id="seedhint"></span>
-    </div>
-  </div>
+  <div class="meta" id="meta"></div>
 
   <section class="registry-section">
     <div class="section-label"><span>The Patron Registry</span><span id="registryCount"></span></div>
@@ -423,11 +422,11 @@ document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random
 document.querySelectorAll('#house button').forEach(b=>b.onclick=()=>{state.house=b.dataset.v;syncPills('house',state.house);render(true);});
 document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;syncPills('finish',state.finish);render(true);});
 
-const detailsToggle=document.getElementById('detailsToggle'),detailsPanel=document.getElementById('detailsPanel');
-detailsToggle.onclick=()=>{
-  const open=detailsPanel.hidden;
-  detailsPanel.hidden=!open;
-  detailsToggle.innerHTML=open?'Hide details &#8963;':'Show details &#8964;';
+const optionsToggle=document.getElementById('optionsToggle'),optionsPanel=document.getElementById('optionsPanel');
+optionsToggle.onclick=()=>{
+  const open=optionsPanel.hidden;
+  optionsPanel.hidden=!open;
+  optionsToggle.innerHTML=open?'Customize &#8963;':'Customize &#8964;';
 };
 
 // ------------------------------------------------------------------
