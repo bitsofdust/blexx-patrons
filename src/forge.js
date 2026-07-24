@@ -195,6 +195,7 @@ const stageWrap=document.getElementById('stageWrap'),stageFlash=document.getElem
 const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
 const mintBtn=document.getElementById('mintBtn'),mintHint=document.getElementById('mintHint');
 const feedEl=document.getElementById('feed'),registryCount=document.getElementById('registryCount');
+const stageMascot=document.getElementById('stageMascot');
 
 function flashStage(kind){
   stageFlash.classList.remove('roll','seal');void stageFlash.offsetWidth;
@@ -220,6 +221,12 @@ function render(flash){
   seedfield.value=state.seed;
   const tintHouse=state.house!=='All'?state.house:(state.mode==='single'?derive(state.seed,state.house).house:null);
   document.body.className=tintHouse?('house-'+tintHouse.toLowerCase()):'house-all';
+  if(state.mode==='single'&&tintHouse){
+    stageMascot.src='assets/mascots/'+tintHouse.toLowerCase()+'_mascot.svg';
+    stageMascot.style.display='block';
+  }else{
+    stageMascot.style.display='none';
+  }
   if(state.mode==='single'){
     const p=derive(state.seed,state.house);const out=card(p,state.finish,300,'h'+state.seed);
     stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
@@ -247,30 +254,30 @@ document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.fini
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{state.mode=b.dataset.v;syncPills('mode',state.mode);render(false);});
 
 // ------------------------------------------------------------------
-// MINT — seal the currently displayed Patron into the Registry.
+// BIND — summon, then bind the currently displayed Patron into the Registry.
 // ------------------------------------------------------------------
-async function mintCurrent(){
+async function bindCurrent(){
   if(state.mode!=='single'||state.minted)return;
   const p=derive(state.seed,state.house);
-  mintBtn.disabled=true;mintHint.textContent='Sealing…';
+  mintBtn.disabled=true;mintHint.textContent='Binding…';
   const doc={seed:p.seed,forcedHouse:state.house,finish:state.finish,house:p.house,name:p.name,rank:p.rank,code:p.code};
   try{
     if(fb.enabled){
-      await fb.db.collection('patrons').add(Object.assign({},doc,{mintedAt:firebase.firestore.FieldValue.serverTimestamp()}));
+      await fb.db.collection('patrons').add(Object.assign({},doc,{boundAt:firebase.firestore.FieldValue.serverTimestamp()}));
       await loadFeed();
     }else{
-      const list=localFeedRead();list.unshift(Object.assign({},doc,{mintedAt:Date.now()}));localFeedWrite(list);renderFeed(list);
+      const list=localFeedRead();list.unshift(Object.assign({},doc,{boundAt:Date.now()}));localFeedWrite(list);renderFeed(list);
     }
     setStatus(true);flashStage('seal');
-    mintHint.textContent=`Sealed as ${p.code} — added to the Registry.`;
+    mintHint.textContent=`Bound as ${p.code} — added to the Registry.`;
   }catch(err){
-    console.error('[BLEXX] Mint failed, saving locally instead.',err);
-    const list=localFeedRead();list.unshift(Object.assign({},doc,{mintedAt:Date.now()}));localFeedWrite(list);renderFeed(list);
+    console.error('[BLEXX] Bind failed, saving locally instead.',err);
+    const list=localFeedRead();list.unshift(Object.assign({},doc,{boundAt:Date.now()}));localFeedWrite(list);renderFeed(list);
     setStatus(true);flashStage('seal');
-    mintHint.textContent=`Sealed as ${p.code} (saved locally — Registry unreachable).`;
+    mintHint.textContent=`Bound as ${p.code} (saved locally — Registry unreachable).`;
   }
 }
-mintBtn.onclick=mintCurrent;
+mintBtn.onclick=bindCurrent;
 
 // ------------------------------------------------------------------
 // THE PATRON REGISTRY — recent mints feed
@@ -286,11 +293,11 @@ function feedCardHTML(d,id){
   return `<div class="feed-card" style="--fc-accent:${accent};--fc-glow:${accent}66" data-seed="${d.seed}" data-house="${d.forcedHouse}" data-finish="${d.finish}">`
     +`<div class="feed-thumb">${out.svg}</div>`
     +`<div class="feed-name">${p.name}</div>`
-    +`<div class="feed-house">${p.house}</div>`
+    +`<div class="feed-house"><img class="feed-house-icon" src="assets/mascots/${p.house.toLowerCase()}_mascot.svg" alt="">${p.house}</div>`
     +`</div>`;
 }
 function renderFeed(docs){
-  if(!docs.length){feedEl.innerHTML='<div class="feed-placeholder">No Patrons minted yet — be the first.</div>';registryCount.textContent='';return;}
+  if(!docs.length){feedEl.innerHTML='<div class="feed-placeholder">No Patrons bound yet — be the first.</div>';registryCount.textContent='';return;}
   feedEl.innerHTML=docs.map((d,i)=>feedCardHTML(d,i)).join('');
   registryCount.textContent=docs.length+' shown';
   feedEl.querySelectorAll('.feed-card').forEach((el,i)=>{
@@ -300,7 +307,7 @@ function renderFeed(docs){
 async function loadFeed(){
   if(!fb.enabled){renderFeed(localFeedRead());return;}
   try{
-    const snap=await fb.db.collection('patrons').orderBy('mintedAt','desc').limit(12).get();
+    const snap=await fb.db.collection('patrons').orderBy('boundAt','desc').limit(12).get();
     renderFeed(snap.docs.map(d=>d.data()));
   }catch(err){
     console.error('[BLEXX] Registry feed failed, falling back to local.',err);

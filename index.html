@@ -41,9 +41,12 @@ body{margin:0;background:var(--onyx);color:var(--text);font-family:'Space Grotes
 .ctl-lab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-right:2px;font-weight:700}
 
 .pill-tabs{display:inline-flex;background:rgba(255,255,255,.03);border:1px solid var(--panel-border);border-radius:var(--r-pill);padding:3px;gap:2px}
-.pill-tabs button{background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:12px;font-weight:600;letter-spacing:.01em;padding:7px 14px;border-radius:var(--r-pill);cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.pill-tabs button{display:inline-flex;align-items:center;gap:6px;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:12px;font-weight:600;letter-spacing:.01em;padding:7px 14px;border-radius:var(--r-pill);cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1);white-space:nowrap}
 .pill-tabs button:hover{color:var(--text)}
 .pill-tabs button.active,.pill-tabs button[aria-pressed="true"]{background:var(--accent);color:#100f0d;box-shadow:0 0 14px var(--accent-glow)}
+.pill-mascot{height:18px;width:18px;object-fit:contain;flex-shrink:0;filter:grayscale(1) brightness(1.7);opacity:.65;transition:filter .18s,opacity .18s}
+.pill-tabs button:hover .pill-mascot{opacity:.9}
+.pill-tabs button.active .pill-mascot,.pill-tabs button[aria-pressed="true"] .pill-mascot{filter:brightness(0);opacity:1}
 
 .ghost-btn{background:transparent;border:1.5px solid var(--panel-border);color:var(--text);font:inherit;font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-pill);cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1)}
 .ghost-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
@@ -59,6 +62,7 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 
 .stage-wrap{position:relative;display:flex;justify-content:center;padding:22px;background:rgba(4,4,5,.5);border:1px solid var(--panel-border);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 30px 60px rgba(0,0,0,.5);transition:box-shadow .5s ease;overflow:hidden}
 .stage-wrap.sealing{box-shadow:0 0 44px var(--accent-glow),0 0 0 1px rgba(255,255,255,.03) inset,0 30px 60px rgba(0,0,0,.5)}
+.stage-mascot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:94%;width:auto;z-index:0;opacity:.16;pointer-events:none;display:none;transition:opacity .4s ease}
 #stage{position:relative;z-index:1;width:100%;display:flex;justify-content:center}
 #stage svg{display:block;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))}
 #sheet{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:100%}
@@ -90,7 +94,8 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 .feed-thumb{width:100%;aspect-ratio:2/3;border-radius:8px;overflow:hidden;background:#050505}
 .feed-thumb svg{width:100%;height:100%;display:block}
 .feed-name{font-size:10.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.feed-house{font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-accent,var(--text-dim));font-weight:700}
+.feed-house{display:flex;align-items:center;gap:4px;font-size:8.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc-accent,var(--text-dim));font-weight:700}
+.feed-house-icon{height:11px;width:11px;object-fit:contain;flex-shrink:0}
 .feed-time{font-size:8px;font-family:ui-monospace,Menlo,Consolas,monospace;color:var(--text-dim);opacity:.7}
 
 @media (max-width:620px){
@@ -113,16 +118,16 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
       <span id="statusText">UNSEALED</span>
     </div>
   </div>
-  <p class="tagline">Three Houses, one winged Patron per seed. Roll to preview, choose a finish, then mint it into the Registry.</p>
+  <p class="tagline">Three Houses, one winged Patron per seed. Summon to preview, choose a finish, then bind it into the Registry.</p>
 
   <div class="panel">
     <div class="ctl-row">
       <span class="ctl-lab">House</span>
       <div class="pill-tabs" id="house">
         <button data-v="All" aria-pressed="true" class="active">All</button>
-        <button data-v="Chance">Chance</button>
-        <button data-v="Manifestation">Manifestation</button>
-        <button data-v="Devotion">Devotion</button>
+        <button data-v="Chance"><img class="pill-mascot" src="assets/mascots/chance_mascot.svg" alt="">Chance</button>
+        <button data-v="Manifestation"><img class="pill-mascot" src="assets/mascots/manifestation_mascot.svg" alt="">Manifestation</button>
+        <button data-v="Devotion"><img class="pill-mascot" src="assets/mascots/devotion_mascot.svg" alt="">Devotion</button>
       </div>
     </div>
     <div class="ctl-row">
@@ -131,7 +136,7 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
         <button data-v="sigil" aria-pressed="true" class="active">Sigil</button>
         <button data-v="relic">Relic</button>
       </div>
-      <button id="reroll" class="ghost-btn">&#8635; Reroll</button>
+      <button id="reroll" class="ghost-btn">&#8635; Summon</button>
       <div class="pill-tabs" id="mode" style="margin-left:auto">
         <button data-v="single" aria-pressed="true" class="active">Single</button>
         <button data-v="sheet">9-up sheet</button>
@@ -152,17 +157,18 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
   </div>
 
   <div class="stage-wrap" id="stageWrap">
+    <img class="stage-mascot" id="stageMascot" alt="">
     <div class="stage-flash" id="stageFlash"></div>
     <div id="stage"></div>
   </div>
   <div class="meta" id="meta"></div>
 
-  <button id="mintBtn" class="mint-btn">&#10038; MINT THIS PATRON</button>
+  <button id="mintBtn" class="mint-btn">&#10038; BIND THIS PATRON</button>
   <p class="mint-hint" id="mintHint"></p>
 
   <section class="registry-section">
     <div class="section-label"><span>The Patron Registry</span><span id="registryCount"></span></div>
-    <div class="feed-container" id="feed"><div class="feed-placeholder">No Patrons minted yet — be the first.</div></div>
+    <div class="feed-container" id="feed"><div class="feed-placeholder">No Patrons bound yet — be the first.</div></div>
   </section>
 </div>
 <script>
@@ -367,6 +373,7 @@ const stageWrap=document.getElementById('stageWrap'),stageFlash=document.getElem
 const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
 const mintBtn=document.getElementById('mintBtn'),mintHint=document.getElementById('mintHint');
 const feedEl=document.getElementById('feed'),registryCount=document.getElementById('registryCount');
+const stageMascot=document.getElementById('stageMascot');
 
 function flashStage(kind){
   stageFlash.classList.remove('roll','seal');void stageFlash.offsetWidth;
@@ -392,6 +399,12 @@ function render(flash){
   seedfield.value=state.seed;
   const tintHouse=state.house!=='All'?state.house:(state.mode==='single'?derive(state.seed,state.house).house:null);
   document.body.className=tintHouse?('house-'+tintHouse.toLowerCase()):'house-all';
+  if(state.mode==='single'&&tintHouse){
+    stageMascot.src='assets/mascots/'+tintHouse.toLowerCase()+'_mascot.svg';
+    stageMascot.style.display='block';
+  }else{
+    stageMascot.style.display='none';
+  }
   if(state.mode==='single'){
     const p=derive(state.seed,state.house);const out=card(p,state.finish,300,'h'+state.seed);
     stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
@@ -419,30 +432,30 @@ document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.fini
 document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{state.mode=b.dataset.v;syncPills('mode',state.mode);render(false);});
 
 // ------------------------------------------------------------------
-// MINT — seal the currently displayed Patron into the Registry.
+// BIND — summon, then bind the currently displayed Patron into the Registry.
 // ------------------------------------------------------------------
-async function mintCurrent(){
+async function bindCurrent(){
   if(state.mode!=='single'||state.minted)return;
   const p=derive(state.seed,state.house);
-  mintBtn.disabled=true;mintHint.textContent='Sealing…';
+  mintBtn.disabled=true;mintHint.textContent='Binding…';
   const doc={seed:p.seed,forcedHouse:state.house,finish:state.finish,house:p.house,name:p.name,rank:p.rank,code:p.code};
   try{
     if(fb.enabled){
-      await fb.db.collection('patrons').add(Object.assign({},doc,{mintedAt:firebase.firestore.FieldValue.serverTimestamp()}));
+      await fb.db.collection('patrons').add(Object.assign({},doc,{boundAt:firebase.firestore.FieldValue.serverTimestamp()}));
       await loadFeed();
     }else{
-      const list=localFeedRead();list.unshift(Object.assign({},doc,{mintedAt:Date.now()}));localFeedWrite(list);renderFeed(list);
+      const list=localFeedRead();list.unshift(Object.assign({},doc,{boundAt:Date.now()}));localFeedWrite(list);renderFeed(list);
     }
     setStatus(true);flashStage('seal');
-    mintHint.textContent=`Sealed as ${p.code} — added to the Registry.`;
+    mintHint.textContent=`Bound as ${p.code} — added to the Registry.`;
   }catch(err){
-    console.error('[BLEXX] Mint failed, saving locally instead.',err);
-    const list=localFeedRead();list.unshift(Object.assign({},doc,{mintedAt:Date.now()}));localFeedWrite(list);renderFeed(list);
+    console.error('[BLEXX] Bind failed, saving locally instead.',err);
+    const list=localFeedRead();list.unshift(Object.assign({},doc,{boundAt:Date.now()}));localFeedWrite(list);renderFeed(list);
     setStatus(true);flashStage('seal');
-    mintHint.textContent=`Sealed as ${p.code} (saved locally — Registry unreachable).`;
+    mintHint.textContent=`Bound as ${p.code} (saved locally — Registry unreachable).`;
   }
 }
-mintBtn.onclick=mintCurrent;
+mintBtn.onclick=bindCurrent;
 
 // ------------------------------------------------------------------
 // THE PATRON REGISTRY — recent mints feed
@@ -458,11 +471,11 @@ function feedCardHTML(d,id){
   return `<div class="feed-card" style="--fc-accent:${accent};--fc-glow:${accent}66" data-seed="${d.seed}" data-house="${d.forcedHouse}" data-finish="${d.finish}">`
     +`<div class="feed-thumb">${out.svg}</div>`
     +`<div class="feed-name">${p.name}</div>`
-    +`<div class="feed-house">${p.house}</div>`
+    +`<div class="feed-house"><img class="feed-house-icon" src="assets/mascots/${p.house.toLowerCase()}_mascot.svg" alt="">${p.house}</div>`
     +`</div>`;
 }
 function renderFeed(docs){
-  if(!docs.length){feedEl.innerHTML='<div class="feed-placeholder">No Patrons minted yet — be the first.</div>';registryCount.textContent='';return;}
+  if(!docs.length){feedEl.innerHTML='<div class="feed-placeholder">No Patrons bound yet — be the first.</div>';registryCount.textContent='';return;}
   feedEl.innerHTML=docs.map((d,i)=>feedCardHTML(d,i)).join('');
   registryCount.textContent=docs.length+' shown';
   feedEl.querySelectorAll('.feed-card').forEach((el,i)=>{
@@ -472,7 +485,7 @@ function renderFeed(docs){
 async function loadFeed(){
   if(!fb.enabled){renderFeed(localFeedRead());return;}
   try{
-    const snap=await fb.db.collection('patrons').orderBy('mintedAt','desc').limit(12).get();
+    const snap=await fb.db.collection('patrons').orderBy('boundAt','desc').limit(12).get();
     renderFeed(snap.docs.map(d=>d.data()));
   }catch(err){
     console.error('[BLEXX] Registry feed failed, falling back to local.',err);
