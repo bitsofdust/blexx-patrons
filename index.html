@@ -40,35 +40,34 @@ body{margin:0;background:var(--onyx);color:var(--text);font-family:'Space Grotes
 .ctl-row:last-child{margin-bottom:0}
 .ctl-lab{font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);margin-right:2px;font-weight:700}
 
-.pill-tabs{display:inline-flex;max-width:100%;overflow-x:auto;background:rgba(255,255,255,.03);border:1px solid var(--panel-border);border-radius:var(--r-pill);padding:3px;gap:2px;scrollbar-width:none}
-.pill-tabs::-webkit-scrollbar{display:none}
-.pill-tabs button{flex:0 0 auto;display:inline-flex;align-items:center;gap:7px;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:12px;font-weight:600;letter-spacing:.01em;padding:7px 14px;border-radius:var(--r-pill);cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1);white-space:nowrap}
-.pill-tabs button:hover{color:var(--text)}
-.pill-tabs button.active,.pill-tabs button[aria-pressed="true"]{background:var(--accent);color:#100f0d;box-shadow:0 0 14px var(--accent-glow)}
-.pill-shape{flex-shrink:0}
-.pill-tabs button.active .pill-shape *,.pill-tabs button[aria-pressed="true"] .pill-shape *{fill:#100f0d !important}
+.swatch-row{display:flex;max-width:100%;overflow-x:auto;gap:8px;scrollbar-width:none;padding:2px}
+.swatch-row::-webkit-scrollbar{display:none}
+.swatch{flex:0 0 auto;display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.03);border:1.5px solid var(--panel-border);border-radius:var(--r-pill);padding:6px 14px 6px 6px;color:var(--text-dim);font:inherit;font-size:12px;font-weight:600;cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1);white-space:nowrap}
+.swatch:hover{color:var(--text);border-color:rgba(255,255,255,.18)}
+.swatch.active,.swatch[aria-pressed="true"]{color:var(--text);border-color:var(--sw-color,var(--accent));background:rgba(255,255,255,.06);box-shadow:0 0 14px var(--sw-glow,var(--accent-glow))}
+.swatch-chip{display:inline-block;width:22px;height:22px;border-radius:50%;flex-shrink:0;background:var(--sw-color,var(--text-dim));box-shadow:inset 0 0 0 1.5px rgba(0,0,0,.25)}
+.swatch-chip.all-chip{background:conic-gradient(#ed2024 0deg 120deg,#405eab 120deg 240deg,#882782 240deg 360deg)}
+.swatch-chip.relic-chip{background:linear-gradient(135deg,#eceadf,#bdb8a8 40%,#79766a 58%,#d2cdbe 78%,#8c8879)}
+.swatch-chip.sigil-chip{background:var(--accent)}
+
+.summon-btn{display:block;width:100%;margin:16px 0 0;padding:17px 24px;background:var(--accent);color:#100f0d;border:none;border-radius:var(--r-pill);font:inherit;font-size:15px;font-weight:700;letter-spacing:.05em;cursor:pointer;box-shadow:0 8px 24px var(--accent-glow);transition:all .18s cubic-bezier(.16,1,.3,1)}
+.summon-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--accent-glow)}
+.summon-btn:active{transform:translateY(0)}
 
 .ghost-btn{background:transparent;border:1.5px solid var(--panel-border);color:var(--text);font:inherit;font-size:12px;font-weight:600;padding:8px 16px;border-radius:var(--r-pill);cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1)}
 .ghost-btn:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px var(--accent-glow)}
 .ghost-btn:active{transform:scale(.97)}
 .ghost-btn.small{padding:6px 12px;font-size:11px}
 
-.summon-btn{display:block;width:100%;margin:14px 0 0;padding:17px 24px;background:var(--accent);color:#100f0d;border:none;border-radius:var(--r-pill);font:inherit;font-size:15px;font-weight:700;letter-spacing:.05em;cursor:pointer;box-shadow:0 8px 24px var(--accent-glow);transition:all .18s cubic-bezier(.16,1,.3,1)}
-.summon-btn:hover{transform:translateY(-2px);box-shadow:0 12px 32px var(--accent-glow)}
-.summon-btn:active{transform:translateY(0)}
-
-.seed-row{margin-top:16px;padding-top:14px;border-top:1px solid var(--panel-border);opacity:.85}
-
 input#seedfield{background:var(--cream);color:#2a2723;border:none;border-radius:var(--r-md);padding:8px 12px;font:inherit;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;width:130px;cursor:text}
 input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 #seedhint{font-family:ui-monospace,Menlo,Consolas,monospace}
 
-.legend{display:flex;gap:18px;justify-content:center;flex-wrap:wrap;margin:4px 0 22px;font-size:11px;color:var(--text-dim);letter-spacing:.02em}
-.legend span{display:inline-flex;align-items:center;gap:6px}
+.showcase{position:relative;display:flex;align-items:center;justify-content:center;gap:36px;padding:32px;background:rgba(4,4,5,.5);border:1px solid var(--panel-border);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 30px 60px rgba(0,0,0,.5);transition:box-shadow .5s ease;overflow:hidden}
+.showcase.sealing{box-shadow:0 0 44px var(--accent-glow),0 0 0 1px rgba(255,255,255,.03) inset,0 30px 60px rgba(0,0,0,.5)}
+.mascot-img{width:220px;max-width:34%;height:auto;flex-shrink:0;opacity:.95;filter:drop-shadow(0 16px 30px rgba(0,0,0,.5));transition:opacity .3s ease}
 
-.stage-wrap{position:relative;display:flex;justify-content:center;padding:22px;background:rgba(4,4,5,.5);border:1px solid var(--panel-border);border-radius:var(--r-lg);box-shadow:0 0 0 1px rgba(255,255,255,.02) inset,0 30px 60px rgba(0,0,0,.5);transition:box-shadow .5s ease;overflow:hidden}
-.stage-wrap.sealing{box-shadow:0 0 44px var(--accent-glow),0 0 0 1px rgba(255,255,255,.03) inset,0 30px 60px rgba(0,0,0,.5)}
-.stage-mascot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);height:120%;width:auto;z-index:0;opacity:.26;pointer-events:none;display:none;transition:opacity .4s ease}
+.stage-wrap{position:relative;display:flex;justify-content:center;flex-shrink:0}
 #stage{position:relative;z-index:1;width:100%;display:flex;justify-content:center}
 #stage svg{display:block;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))}
 .stage-flash{position:absolute;inset:0;z-index:2;pointer-events:none;opacity:0;mix-blend-mode:screen}
@@ -79,12 +78,18 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 .pop{animation:cardPop .45s cubic-bezier(.34,1.56,.64,1)}
 @keyframes cardPop{0%{transform:scale(.9);filter:brightness(1.5) saturate(1.25)}60%{transform:scale(1.035)}100%{transform:scale(1);filter:none}}
 
-.meta{margin-top:12px;font-size:11.5px;color:var(--text-dim);text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em}
+.details-toggle{display:block;margin:16px auto 0;background:transparent;border:none;color:var(--text-dim);font:inherit;font-size:11px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;cursor:pointer;padding:6px 10px}
+.details-toggle:hover{color:var(--text)}
+.details-panel{margin-top:4px}
+.details-panel[hidden]{display:none}
+.meta{font-size:11.5px;color:var(--text-dim);text-align:center;font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.03em}
+.recall-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:center;margin-top:14px;padding-top:14px;border-top:1px solid var(--panel-border)}
 
 .mint-btn{display:block;width:100%;margin-top:18px;padding:16px 24px;background:var(--cream);color:#17140f;border:none;border-radius:var(--r-pill);font:inherit;font-size:14px;font-weight:700;letter-spacing:.04em;cursor:pointer;transition:all .18s cubic-bezier(.16,1,.3,1)}
 .mint-btn:hover:not(:disabled){background:var(--accent);color:#100f0d;transform:translateY(-2px);box-shadow:0 10px 28px var(--accent-glow)}
 .mint-btn:active:not(:disabled){transform:translateY(0)}
 .mint-btn:disabled{opacity:.4;cursor:not-allowed}
+.mint-btn[hidden]{display:none}
 .mint-hint{text-align:center;font-size:11px;color:var(--text-dim);margin-top:8px;min-height:14px}
 
 .registry-section{margin-top:40px}
@@ -106,6 +111,7 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
 @media (max-width:620px){
   .wrap{padding:24px 14px 48px}
   .top-hud{flex-direction:column;align-items:flex-start;gap:8px}
+  .mascot-img{display:none}
 }
 </style>
 </head>
@@ -127,44 +133,44 @@ input#seedfield:focus{outline:2px solid var(--accent);outline-offset:1px}
   <div class="panel">
     <div class="ctl-row">
       <span class="ctl-lab">House</span>
-      <div class="pill-tabs" id="house">
-        <button data-v="All" aria-pressed="true" class="active">All</button>
-        <button data-v="Chance"><svg class="pill-shape" width="12" height="12" viewBox="0 0 14 14"><path d="M7 1 L13 12 L1 12 Z" fill="#ed2024"/></svg>Chance</button>
-        <button data-v="Manifestation"><svg class="pill-shape" width="12" height="12" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#405eab"/></svg>Manifestation</button>
-        <button data-v="Devotion"><svg class="pill-shape" width="12" height="12" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="#882782"/></svg>Devotion</button>
+      <div class="swatch-row" id="house">
+        <button data-v="All" aria-pressed="true" class="swatch active"><span class="swatch-chip all-chip"></span>All</button>
+        <button data-v="Chance" class="swatch" style="--sw-color:#ed2024;--sw-glow:rgba(237,32,36,.4)"><span class="swatch-chip" style="background:#ed2024"></span>Chance</button>
+        <button data-v="Manifestation" class="swatch" style="--sw-color:#405eab;--sw-glow:rgba(64,94,171,.4)"><span class="swatch-chip" style="background:#405eab"></span>Manifestation</button>
+        <button data-v="Devotion" class="swatch" style="--sw-color:#882782;--sw-glow:rgba(136,39,130,.4)"><span class="swatch-chip" style="background:#882782"></span>Devotion</button>
       </div>
     </div>
     <div class="ctl-row">
       <span class="ctl-lab">Finish</span>
-      <div class="pill-tabs" id="finish">
-        <button data-v="sigil" aria-pressed="true" class="active">Sigil</button>
-        <button data-v="relic">Relic</button>
+      <div class="swatch-row" id="finish">
+        <button data-v="sigil" aria-pressed="true" class="swatch active"><span class="swatch-chip sigil-chip"></span>Sigil</button>
+        <button data-v="relic" class="swatch" style="--sw-color:#bdb8a8;--sw-glow:rgba(189,184,168,.4)"><span class="swatch-chip relic-chip"></span>Relic</button>
       </div>
     </div>
     <button id="reroll" class="summon-btn">&#8635; SUMMON A PATRON</button>
-    <div class="ctl-row seed-row">
+  </div>
+
+  <div class="showcase" id="showcase">
+    <img class="mascot-img" id="stageMascot" alt="">
+    <div class="stage-wrap" id="stageWrap">
+      <div class="stage-flash" id="stageFlash"></div>
+      <div id="stage"></div>
+    </div>
+  </div>
+
+  <button id="mintBtn" class="mint-btn" hidden>&#10038; BIND THIS PATRON</button>
+  <p class="mint-hint" id="mintHint"></p>
+
+  <button id="detailsToggle" class="details-toggle">Show details &#8964;</button>
+  <div class="details-panel" id="detailsPanel" hidden>
+    <div class="meta" id="meta"></div>
+    <div class="recall-row">
       <span class="ctl-lab">Recall seed</span>
       <input id="seedfield" type="number" inputmode="numeric" min="0">
       <button id="go" class="ghost-btn small">Recall</button>
       <span class="ctl-lab" id="seedhint"></span>
     </div>
   </div>
-
-  <div class="legend">
-    <span><svg width="13" height="13" viewBox="0 0 14 14"><path d="M7 1 L13 12 L1 12 Z" fill="#ed2024"/></svg> Chance</span>
-    <span><svg width="13" height="13" viewBox="0 0 14 14"><circle cx="7" cy="7" r="6" fill="#405eab"/></svg> Manifestation</span>
-    <span><svg width="13" height="13" viewBox="0 0 14 14"><rect x="1" y="1" width="12" height="12" fill="#882782"/></svg> Devotion</span>
-  </div>
-
-  <div class="stage-wrap" id="stageWrap">
-    <img class="stage-mascot" id="stageMascot" alt="">
-    <div class="stage-flash" id="stageFlash"></div>
-    <div id="stage"></div>
-  </div>
-  <div class="meta" id="meta"></div>
-
-  <button id="mintBtn" class="mint-btn">&#10038; BIND THIS PATRON</button>
-  <p class="mint-hint" id="mintHint"></p>
 
   <section class="registry-section">
     <div class="section-label"><span>The Patron Registry</span><span id="registryCount"></span></div>
@@ -366,10 +372,10 @@ const LOCAL_KEY='blexx_patrons_local';
 function localFeedRead(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]');}catch(e){return[];}}
 function localFeedWrite(list){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(list.slice(0,12)));}catch(e){}}
 
-let state={house:'All',finish:'sigil',seed:Math.floor(Math.random()*1e7),minted:false};
+let state={house:'All',finish:'sigil',seed:Math.floor(Math.random()*1e7),minted:false,interacted:false};
 const stage=document.getElementById('stage'),meta=document.getElementById('meta');
 const seedfield=document.getElementById('seedfield'),goBtn=document.getElementById('go'),seedhint=document.getElementById('seedhint');
-const stageWrap=document.getElementById('stageWrap'),stageFlash=document.getElementById('stageFlash');
+const showcase=document.getElementById('showcase'),stageFlash=document.getElementById('stageFlash');
 const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
 const mintBtn=document.getElementById('mintBtn'),mintHint=document.getElementById('mintHint');
 const feedEl=document.getElementById('feed'),registryCount=document.getElementById('registryCount');
@@ -378,7 +384,7 @@ const stageMascot=document.getElementById('stageMascot');
 function flashStage(kind){
   stageFlash.classList.remove('roll','seal');void stageFlash.offsetWidth;
   stageFlash.classList.add(kind);
-  if(kind==='seal'){stageWrap.classList.add('sealing');setTimeout(()=>stageWrap.classList.remove('sealing'),900);}
+  if(kind==='seal'){showcase.classList.add('sealing');setTimeout(()=>showcase.classList.remove('sealing'),900);}
   const target=stage.firstElementChild;
   if(target){target.classList.remove('pop');void target.offsetWidth;target.classList.add('pop');}
 }
@@ -387,6 +393,7 @@ function setStatus(minted){
   statusDot.classList.toggle('sealed',minted);
   statusText.textContent=minted?'SEALED':'UNSEALED';
   mintBtn.disabled=minted;
+  mintBtn.hidden=!state.interacted;
 }
 function syncPills(containerId,value){
   document.querySelectorAll('#'+containerId+' button').forEach(b=>{
@@ -400,7 +407,6 @@ function render(flash){
   const p=derive(state.seed,state.house);
   document.body.className='house-'+p.house.toLowerCase();
   stageMascot.src='assets/mascots/'+p.house.toLowerCase()+'_mascot.svg';
-  stageMascot.style.display='block';
   const out=card(p,state.finish,300,'h'+state.seed);
   stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
   seedhint.textContent=`= ${p.code}`;
@@ -410,12 +416,19 @@ function render(flash){
   if(flash)flashStage('roll');
 }
 
-function applySeed(){let v=parseInt(seedfield.value,10);if(!isNaN(v)){state.seed=Math.max(0,v);render(true);}}
+function applySeed(){let v=parseInt(seedfield.value,10);if(!isNaN(v)){state.seed=Math.max(0,v);state.interacted=true;render(true);}}
 goBtn.onclick=applySeed;
 seedfield.addEventListener('keydown',e=>{if(e.key==='Enter')applySeed();});
-document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);render(true);};
+document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);state.interacted=true;render(true);};
 document.querySelectorAll('#house button').forEach(b=>b.onclick=()=>{state.house=b.dataset.v;syncPills('house',state.house);render(true);});
 document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;syncPills('finish',state.finish);render(true);});
+
+const detailsToggle=document.getElementById('detailsToggle'),detailsPanel=document.getElementById('detailsPanel');
+detailsToggle.onclick=()=>{
+  const open=detailsPanel.hidden;
+  detailsPanel.hidden=!open;
+  detailsToggle.innerHTML=open?'Hide details &#8963;':'Show details &#8964;';
+};
 
 // ------------------------------------------------------------------
 // BIND — summon, then bind the currently displayed Patron into the Registry.
@@ -447,7 +460,7 @@ mintBtn.onclick=bindCurrent;
 // THE PATRON REGISTRY — recent mints feed
 // ------------------------------------------------------------------
 function loadIntoStage(d){
-  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';
+  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';state.interacted=true;
   syncPills('house',state.house);syncPills('finish',state.finish);
   render(false);setStatus(true);
 }

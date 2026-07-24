@@ -188,10 +188,10 @@ const LOCAL_KEY='blexx_patrons_local';
 function localFeedRead(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]');}catch(e){return[];}}
 function localFeedWrite(list){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(list.slice(0,12)));}catch(e){}}
 
-let state={house:'All',finish:'sigil',seed:Math.floor(Math.random()*1e7),minted:false};
+let state={house:'All',finish:'sigil',seed:Math.floor(Math.random()*1e7),minted:false,interacted:false};
 const stage=document.getElementById('stage'),meta=document.getElementById('meta');
 const seedfield=document.getElementById('seedfield'),goBtn=document.getElementById('go'),seedhint=document.getElementById('seedhint');
-const stageWrap=document.getElementById('stageWrap'),stageFlash=document.getElementById('stageFlash');
+const showcase=document.getElementById('showcase'),stageFlash=document.getElementById('stageFlash');
 const statusDot=document.getElementById('statusDot'),statusText=document.getElementById('statusText');
 const mintBtn=document.getElementById('mintBtn'),mintHint=document.getElementById('mintHint');
 const feedEl=document.getElementById('feed'),registryCount=document.getElementById('registryCount');
@@ -200,7 +200,7 @@ const stageMascot=document.getElementById('stageMascot');
 function flashStage(kind){
   stageFlash.classList.remove('roll','seal');void stageFlash.offsetWidth;
   stageFlash.classList.add(kind);
-  if(kind==='seal'){stageWrap.classList.add('sealing');setTimeout(()=>stageWrap.classList.remove('sealing'),900);}
+  if(kind==='seal'){showcase.classList.add('sealing');setTimeout(()=>showcase.classList.remove('sealing'),900);}
   const target=stage.firstElementChild;
   if(target){target.classList.remove('pop');void target.offsetWidth;target.classList.add('pop');}
 }
@@ -209,6 +209,7 @@ function setStatus(minted){
   statusDot.classList.toggle('sealed',minted);
   statusText.textContent=minted?'SEALED':'UNSEALED';
   mintBtn.disabled=minted;
+  mintBtn.hidden=!state.interacted;
 }
 function syncPills(containerId,value){
   document.querySelectorAll('#'+containerId+' button').forEach(b=>{
@@ -222,7 +223,6 @@ function render(flash){
   const p=derive(state.seed,state.house);
   document.body.className='house-'+p.house.toLowerCase();
   stageMascot.src='assets/mascots/'+p.house.toLowerCase()+'_mascot.svg';
-  stageMascot.style.display='block';
   const out=card(p,state.finish,300,'h'+state.seed);
   stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
   seedhint.textContent=`= ${p.code}`;
@@ -232,12 +232,19 @@ function render(flash){
   if(flash)flashStage('roll');
 }
 
-function applySeed(){let v=parseInt(seedfield.value,10);if(!isNaN(v)){state.seed=Math.max(0,v);render(true);}}
+function applySeed(){let v=parseInt(seedfield.value,10);if(!isNaN(v)){state.seed=Math.max(0,v);state.interacted=true;render(true);}}
 goBtn.onclick=applySeed;
 seedfield.addEventListener('keydown',e=>{if(e.key==='Enter')applySeed();});
-document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);render(true);};
+document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);state.interacted=true;render(true);};
 document.querySelectorAll('#house button').forEach(b=>b.onclick=()=>{state.house=b.dataset.v;syncPills('house',state.house);render(true);});
 document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;syncPills('finish',state.finish);render(true);});
+
+const detailsToggle=document.getElementById('detailsToggle'),detailsPanel=document.getElementById('detailsPanel');
+detailsToggle.onclick=()=>{
+  const open=detailsPanel.hidden;
+  detailsPanel.hidden=!open;
+  detailsToggle.innerHTML=open?'Hide details &#8963;':'Show details &#8964;';
+};
 
 // ------------------------------------------------------------------
 // BIND — summon, then bind the currently displayed Patron into the Registry.
@@ -269,7 +276,7 @@ mintBtn.onclick=bindCurrent;
 // THE PATRON REGISTRY — recent mints feed
 // ------------------------------------------------------------------
 function loadIntoStage(d){
-  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';
+  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';state.interacted=true;
   syncPills('house',state.house);syncPills('finish',state.finish);
   render(false);setStatus(true);
 }
