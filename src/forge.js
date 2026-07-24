@@ -188,7 +188,7 @@ const LOCAL_KEY='blexx_patrons_local';
 function localFeedRead(){try{return JSON.parse(localStorage.getItem(LOCAL_KEY)||'[]');}catch(e){return[];}}
 function localFeedWrite(list){try{localStorage.setItem(LOCAL_KEY,JSON.stringify(list.slice(0,12)));}catch(e){}}
 
-let state={house:'All',finish:'sigil',mode:'single',seed:Math.floor(Math.random()*1e7),minted:false};
+let state={house:'All',finish:'sigil',seed:Math.floor(Math.random()*1e7),minted:false};
 const stage=document.getElementById('stage'),meta=document.getElementById('meta');
 const seedfield=document.getElementById('seedfield'),goBtn=document.getElementById('go'),seedhint=document.getElementById('seedhint');
 const stageWrap=document.getElementById('stageWrap'),stageFlash=document.getElementById('stageFlash');
@@ -208,7 +208,7 @@ function setStatus(minted){
   state.minted=minted;
   statusDot.classList.toggle('sealed',minted);
   statusText.textContent=minted?'SEALED':'UNSEALED';
-  mintBtn.disabled=state.mode!=='single'||minted;
+  mintBtn.disabled=minted;
 }
 function syncPills(containerId,value){
   document.querySelectorAll('#'+containerId+' button').forEach(b=>{
@@ -219,27 +219,14 @@ function syncPills(containerId,value){
 
 function render(flash){
   seedfield.value=state.seed;
-  const tintHouse=state.house!=='All'?state.house:(state.mode==='single'?derive(state.seed,state.house).house:null);
-  document.body.className=tintHouse?('house-'+tintHouse.toLowerCase()):'house-all';
-  if(state.mode==='single'&&tintHouse){
-    stageMascot.src='assets/mascots/'+tintHouse.toLowerCase()+'_mascot.svg';
-    stageMascot.style.display='block';
-  }else{
-    stageMascot.style.display='none';
-  }
-  if(state.mode==='single'){
-    const p=derive(state.seed,state.house);const out=card(p,state.finish,300,'h'+state.seed);
-    stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
-    seedhint.textContent=`= ${p.code}`;
-    meta.textContent=`${p.name} · ${p.rank} of ${p.house} · ${p.wingSize}/${p.wingTex} wings · ${out.c.rarity} · ${p.code}`;
-    mintBtn.style.display='';mintHint.style.display='';
-  }else{
-    let cells='';for(let i=0;i<9;i++){const p=derive(state.seed+i*1013,state.house);cells+=card(p,state.finish,'100%','s'+state.seed+'_'+i).svg;}
-    stage.innerHTML=`<div id="sheet">${cells}</div>`;
-    seedhint.textContent='base seed (9-up)';
-    meta.textContent=`Press sheet · 9-up · base seed ${state.seed}`;
-    mintBtn.style.display='none';mintHint.style.display='none';
-  }
+  const p=derive(state.seed,state.house);
+  document.body.className='house-'+p.house.toLowerCase();
+  stageMascot.src='assets/mascots/'+p.house.toLowerCase()+'_mascot.svg';
+  stageMascot.style.display='block';
+  const out=card(p,state.finish,300,'h'+state.seed);
+  stage.innerHTML=`<div style="display:block;background:transparent;padding:0">${out.svg}</div>`;
+  seedhint.textContent=`= ${p.code}`;
+  meta.textContent=`${p.name} · ${p.rank} of ${p.house} · ${p.wingSize}/${p.wingTex} wings · ${out.c.rarity} · ${p.code}`;
   setStatus(false);
   mintHint.textContent='';
   if(flash)flashStage('roll');
@@ -251,13 +238,12 @@ seedfield.addEventListener('keydown',e=>{if(e.key==='Enter')applySeed();});
 document.getElementById('reroll').onclick=()=>{state.seed=Math.floor(Math.random()*1e7);render(true);};
 document.querySelectorAll('#house button').forEach(b=>b.onclick=()=>{state.house=b.dataset.v;syncPills('house',state.house);render(true);});
 document.querySelectorAll('#finish button').forEach(b=>b.onclick=()=>{state.finish=b.dataset.v;syncPills('finish',state.finish);render(true);});
-document.querySelectorAll('#mode button').forEach(b=>b.onclick=()=>{state.mode=b.dataset.v;syncPills('mode',state.mode);render(false);});
 
 // ------------------------------------------------------------------
 // BIND — summon, then bind the currently displayed Patron into the Registry.
 // ------------------------------------------------------------------
 async function bindCurrent(){
-  if(state.mode!=='single'||state.minted)return;
+  if(state.minted)return;
   const p=derive(state.seed,state.house);
   mintBtn.disabled=true;mintHint.textContent='Binding…';
   const doc={seed:p.seed,forcedHouse:state.house,finish:state.finish,house:p.house,name:p.name,rank:p.rank,code:p.code};
@@ -283,9 +269,14 @@ mintBtn.onclick=bindCurrent;
 // THE PATRON REGISTRY — recent mints feed
 // ------------------------------------------------------------------
 function loadIntoStage(d){
-  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';state.mode='single';
-  syncPills('house',state.house);syncPills('finish',state.finish);syncPills('mode','single');
+  state.seed=d.seed;state.house=d.forcedHouse||'All';state.finish=d.finish||'sigil';
+  syncPills('house',state.house);syncPills('finish',state.finish);
   render(false);setStatus(true);
+}
+function houseShapeSVG(house,color){
+  const shape=HOUSES[house]?HOUSES[house].shape:'circle';
+  const inner=shape==='triangle'?'<path d="M7 1 L13 12 L1 12 Z"/>':shape==='square'?'<rect x="1" y="1" width="12" height="12"/>':'<circle cx="7" cy="7" r="6"/>';
+  return `<svg class="feed-house-icon" width="9" height="9" viewBox="0 0 14 14" fill="${color}">${inner}</svg>`;
 }
 function feedCardHTML(d,id){
   const p=derive(d.seed,d.forcedHouse);const out=card(p,d.finish,100,'f'+id);
@@ -293,7 +284,7 @@ function feedCardHTML(d,id){
   return `<div class="feed-card" style="--fc-accent:${accent};--fc-glow:${accent}66" data-seed="${d.seed}" data-house="${d.forcedHouse}" data-finish="${d.finish}">`
     +`<div class="feed-thumb">${out.svg}</div>`
     +`<div class="feed-name">${p.name}</div>`
-    +`<div class="feed-house"><img class="feed-house-icon" src="assets/mascots/${p.house.toLowerCase()}_mascot.svg" alt="">${p.house}</div>`
+    +`<div class="feed-house">${houseShapeSVG(p.house,accent)}${p.house}</div>`
     +`</div>`;
 }
 function renderFeed(docs){
